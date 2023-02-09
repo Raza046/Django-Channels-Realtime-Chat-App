@@ -427,10 +427,8 @@ body {
 									</div>						
 									<div class="discussions">
 										<h1>Discussions</h1>
-										<div class="list-group" id="chats" role="tablist">
 
-
-									<div class="box">
+									<!-- <div class="box">
 										<input type="checkbox" id="like" class="field-reactions">
 										<h3 class="text-desc">Press space and after tab key to navigation</h3>
 										<label for="like" class="label-reactions">Like</label>
@@ -442,14 +440,15 @@ body {
 										<button class="reaction-wow"><span class="legend-reaction">Wow</span></button>
 										<button class="reaction-sad"><span class="legend-reaction">Sad</span></button>
 										<button class="reaction-angry"><span class="legend-reaction">Angry</span></button>
-									</div>
+									</div> -->
+									<div class="list-group" id="chats" role="tablist">
 
 											{% for u in all_usr %}
 
 												{% if u.username == usr2.username %}
-													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single active">
+													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single active" id="msg__{{u.username}}">
 												{% else %}
-													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single">
+													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single" id="msg__{{u.username}}">
 												{% endif %}
 													<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
 													<div class="status">
@@ -461,11 +460,13 @@ body {
 													<div class="data">
 														<h5>{{u.username|capfirst}}</h5>
 														<span>Mon</span>
-														{% for m in msgs %}
-															{% if m.sender == u or m.receiver == u %}
-																<p id="{{m.room.group_name}}_message">{{m.message}}</p>
-															{% endif %}
-														{% endfor %}
+														<p id="{{u.username}}_message">
+															{% for m in msgs %}
+																{% if m.sender == u or m.receiver == u %}
+																	{{m.message}}
+																{% endif %}
+															{% endfor %}
+														</p>
 													</div>
 												</a>
 											{% endfor %}
@@ -1114,7 +1115,7 @@ body {
 																			<span>24kb Document</span>
 																		</div> -->
 																	<!-- </div> -->
-																	<p id="msg_{{m.id}}">{{m.message}}</p>
+																		<p id="msg_{{m.id}}">{{m.message}}</p>
 																</div>
 															</div>
 															<span>{{m.date}}</span>
@@ -1125,7 +1126,11 @@ body {
 														<div class="text-main">
 															<div class="text-group me">
 																<div class="text me">
-																	<p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}}</p>
+																	{% if m.receiver == m.seen_by_users %}
+																		<p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}} seen</p>
+																	{% else %}
+																		<p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}}</p>
+																	{% endif %}
 																</div>
 															</div>
 															<span><i class="material-icons">check</i>{{m.date}}</span>
@@ -1377,18 +1382,37 @@ body {
     let users_chatsocket_url = "ws://" + window.location.host +"/ws/user_chat/room_id="+"{{usr.id}}"
 	let message_edit = false
 	let message_id = ""
-
-	
-
+	let msg_audio = new Audio(window.location.origin + "/static/audio/msg_sound.wav");
     const chatSocket = new WebSocket(url)
+	let m_audio = false
+
+	// chatSocket.send(JSON.stringify({
+	// 			'username':"{{usr.username}}",
+	// 			"message_seen":"Yes seen"
+	// 		}))
+
     const UserchatSocket = new WebSocket(users_chatsocket_url)
 
 	UserchatSocket.onmessage = function(e){
         let data = JSON.parse(e.data)
         console.log('-----------NOTIF------------');
 		console.log('Data:', data);
-        console.log('-----------NOTIF------------');
-		document.getElementById( data.message.room + "_message").innerHTML = data.message.message
+		console.log(data.message.my_sender)
+		ShiftUp(data.message.my_sender);
+		console.log('-----------NOTIF------------');
+		document.getElementById( data.message.my_sender + "_message").innerHTML = "<b>"+data.message.message+"</b>";
+		msg_audio.play();
+	}
+
+
+	function ShiftUp(sender) {
+		var row = document.getElementById('chats');
+		var user_div = document.getElementById('msg__'+ sender);
+
+		if (row.childNodes[0].nextSibling != user_div){
+			console.log("Now Shift it upwards");
+			row.insertBefore(user_div, row.firstChild);
+		}
 	}
 
     chatSocket.onmessage = function(e){
@@ -1396,14 +1420,17 @@ body {
         console.log('Data:', data);
         console.log('Data username:', data.username);
 
-        if(data.type == "chat"){
+		if(data.type == "chat"){
             let msgs = document.getElementById("msg_body")
 			if(data.username == "{{request.user.username}}"){
+				if(data.seen == "Yes"){
+					data.message = data.message + " Seen"
+				}
 				msgs.innerHTML += '<div class="message me">'+
 									'<div class="text-main">'+
 										'<div class="text-group me">'+
 											'<div class="text me">'+
-												'<p>'+ data.message +'</p>'+
+													'<p id="msg_'+ data.messageId +'">'+ data.message +'</p>'+
 											'</div>'+
 										'</div>'+
 										'<span><i class="material-icons">check</i>'+ new Date().toLocaleTimeString(); +'</span>'
@@ -1415,12 +1442,18 @@ body {
 										'<div class="text-main">'+
 											'<div class="text-group">'+
 												'<div class="text">'+
-													'<p>'+ data.message +'</p>'+
+													'<p id="msg_'+ data.messageId +'">'+ data.message +'</p>'+
 												'</div>'+
 											'</div>'+
 											'<span>'+ new Date().toLocaleTimeString(); +'</span>'+
 										'</div>'+
 									'</div>'
+				m_audio = true;
+			}
+
+			if (m_audio == true){
+				msg_audio.play();
+				m_audio = false
 			}
 
         }
@@ -1440,12 +1473,23 @@ body {
 			if(data.username != "{{request.user.username}}"){
 				console.log("{{request.user.username}} IS TYPING........");
 				document.getElementById("typing_div").style.display="block";
-				setTimeout(function(){ 
+				setTimeout(function(){
 					document.getElementById("typing_div").style.display="none";
 				}, 3000);
 			}
 		}
 		
+		else if(data.type == "message_seen"){
+			console.log(data)
+			for(i=0; i<data.messages_seen.length; i++){
+				console.log("Make these Messages seen")
+				console.log(data.messages_seen[i])
+				document.getElementById("msg_" + data.messages_seen[i]).innerHTML += " seen"
+				console.log("Make these Messages seen")
+			}
+
+		}
+
     }
 
     let form = document.getElementById("message_form")

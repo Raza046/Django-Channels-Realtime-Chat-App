@@ -2,15 +2,30 @@ from django.shortcuts import render
 from .models import Message, MessageRoom
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.views import View
 # Create your views here.
 
 
-def HomePage(request):
 
-    usr = User.objects.get(id=request.user.id)
-    all_usr = User.objects.exclude(id=request.user.id)
+class HomePageView(View):
 
-    return render(request,"index.html", context={"usr":usr,"all_usr":all_usr})
+    Model = User
+    template_name = "index.html"
+
+    def get(self, request, *args, **kwargs):
+        usr = User.objects.get(id=request.user.id)
+        all_usr = User.objects.exclude(id=request.user.id)
+        context = {"usr":usr,"all_usr":all_usr}
+        return render(request,"index.html", context)
+
+    #     return HttpResponse('GET request!')
+
+    # def post(self, request, *args, **kwargs):
+    #     return HttpResponse('POST request!')
+    
+    
+
+    # return render(request,"index.html", context={"usr":usr,"all_usr":all_usr})
 
 
 def ChatRoom(request,id):
