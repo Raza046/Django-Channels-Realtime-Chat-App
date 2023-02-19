@@ -1,10 +1,10 @@
 from django.shortcuts import render
-from .models import Message, MessageRoom
+from requests import Response
+from .models import FriendRequest, Message, MessageRoom, Notification, UserProfile
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.views import View
 # Create your views here.
-
 
 
 class HomePageView(View):
@@ -18,20 +18,16 @@ class HomePageView(View):
         context = {"usr":usr,"all_usr":all_usr}
         return render(request,"index.html", context)
 
-    #     return HttpResponse('GET request!')
 
-    # def post(self, request, *args, **kwargs):
-    #     return HttpResponse('POST request!')
-    
-    
+def LoginPage(request):
 
-    # return render(request,"index.html", context={"usr":usr,"all_usr":all_usr})
+    return render(request,"login.html")
 
 
 def ChatRoom(request,id):
 
-    usr = User.objects.get(id=request.user.id)
-    usr2 = User.objects.get(id=id)
+    usr = UserProfile.objects.get(user_id=request.user.id)
+    usr2 = UserProfile.objects.get(id=id)
     
     if not MessageRoom.objects.filter(first_user=usr, second_user=usr2).exists() and \
            not MessageRoom.objects.filter(first_user=usr2, second_user=usr).exists():
@@ -50,8 +46,16 @@ def ChatRoom(request,id):
     # print("------------------MessageRoom-----------------")
 
     print(request.user)
-    all_usr = User.objects.exclude(id=request.user.id)
-    context = {"msg":msg,"usr":usr,"all_usr":all_usr,"usr2":usr2, "room_name":room_name, "msgs_room":msgs_room, "msgs":m_arr}
+    all_usr = UserProfile.objects.filter(user_id=request.user.id).first()
+    print(all_usr)
+    profiles = UserProfile.objects.exclude(user=request.user)
+    user_profile = UserProfile.objects.filter(user=request.user).first()
+    user_notifications = Notification.objects.filter(to_user=user_profile).all()
+    friend_req = FriendRequest.objects.filter(from_user=user_profile).values_list("to_user", flat=True)
+    print(user_notifications)
+
+    context = {"msg":msg,"usr":usr,"all_usr":all_usr,"usr2":usr2, "room_name":room_name,"notifications":user_notifications,
+             "msgs_room":msgs_room, "msgs":m_arr, "profiles":profiles, "user_profile":user_profile, "friend_req":friend_req}
 
     return render(request,"chatroom_index.html", context=context)
 
@@ -70,3 +74,11 @@ def GetGroupName(u1, u2):
 
     return group_name
 
+
+
+def FileUpload(request):
+
+    print(request.FILES)
+    print("AJAX WORKING")
+
+    return Response("Yes File received")

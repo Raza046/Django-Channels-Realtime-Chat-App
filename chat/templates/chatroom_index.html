@@ -18,6 +18,39 @@
 
 <style>
 
+
+.dropbtn {
+  /* background-color: #3498DB; */
+  color: rgb(88, 88, 88);
+  /* padding: 16px; */
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* .dropdown a:hover {background-color: #ddd;} */
+
+.show {display: block;}
+
+
+
 * {
   padding: 0;
   margin: 0;
@@ -256,13 +289,13 @@ body {
 					<div class="container">
 						<div class="inside">
 							<div class="nav nav-tab menu">
-								<button class="btn"><img class="avatar-xl" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" alt="avatar"></button>
+								<button class="btn"><img class="avatar-xl" src="/{{user_profile.prof_image}}" alt="avatar"></button>
 								<a href="#members" data-toggle="tab"><i class="material-icons">account_circle</i></a>
 								<a href="#discussions" data-toggle="tab" class="active"><i class="material-icons active">chat_bubble_outline</i></a>
 								<a href="#notifications" data-toggle="tab" class="f-grow1"><i class="material-icons">notifications_none</i></a>
 								<button class="btn mode"><i class="material-icons">brightness_2</i></button>
 								<a href="#settings" data-toggle="tab"><i class="material-icons">settings</i></a>
-								<button class="btn power" onclick="visitPage();"><i class="material-icons">power_settings_new</i></button>
+								<a href="/login"><button class="btn power"><i class="material-icons">power_settings_new</i></button></a>
 							</div>
 						</div>
 					</div>
@@ -286,127 +319,57 @@ body {
 										<button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all">All</button>
 										<button class="btn filterMembersBtn" data-toggle="list" data-filter="online">Online</button>
 										<button class="btn filterMembersBtn" data-toggle="list" data-filter="offline">Offline</button>
-									</div>						
+									</div>
 									<div class="contacts">
 										<h1>Contacts</h1>
 										<div class="list-group" id="contacts" role="tablist">
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
+											{% for users in profiles.all %}
+
+												<a href="#" class="filterMembers all online contact" data-toggle="list">
+													<img class="avatar-md" src="/{{users.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{users.user.username}}" alt="avatar">
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="data">
+														<h5>{{users.user.username}}</h5>
+														<p>{{users.city}}, {{users.country}}</p>
+													</div>
+													<div class="">
+														<i data-toggle="modal" data-target="#FriendRequestModal_{{users.id}}" class="material-icons">person_add</i>
+													</div>
+												</a>
+												
+												<div id="FriendRequestModal_{{users.id}}" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+													<div class="modal-dialog modal-dialog-centered" role="document">
+														<div class="requests">
+															<div class="title">
+																<!-- <h1>Add your friends</h1> -->
+																<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+															</div>
+															<div class="content">
+																<form id="freq_form_{{users.id}}" onsubmit="event.preventDefault(); friend_form('freq_form_{{users.id}}','{{users.id}}');">
+																	<div class="form-group">
+																		<center>
+																			<img class="avatar-lg" src="/{{users.prof_image}}" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																			<br><h5 style="color:rgb(20, 20, 20)"><b>{{users.user.username|capfirst}}</b></h5>
+																		</center>
+																	</div>
+																	<div class="form-group">
+																		<label for="welcome">Message:</label>
+																		<textarea id="freq_msg_{{users.id}}" style="color:rgb(29, 28, 28)!important;" class="text-control" placeholder="Send message...">Hi {{users.user.username|capfirst}}, I'd like to add you as a friend.</textarea>
+																	</div>
+																	{% if users.id in friend_req %}
+																		<button type="submit" style="background-color:#14a44d; opacity:0.5;" disabled class="btn button w-100">Request Already Sent</button>
+																	{% else %}
+																		<button type="submit" class="btn button w-100">Send Friend Request</button>
+																	{% endif %}
+																</form>
+															</div>
+														</div>
+													</div>
 												</div>
-												<div class="data">
-													<h5>Janette Dalton</h5>
-													<p>Sofia, Bulgaria</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Michael Knudsen</h5>
-													<p>Washington, USA</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Lean Avent</h5>
-													<p>Shanghai, China</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Mariette Toles</h5>
-													<p>Helena, Montana</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Harmony Otero</h5>
-													<p>Indore, India</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Keith Morris</h5>
-													<p>Chisinau, Moldova</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Louis Martinez</h5>
-													<p>Vienna, Austria</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Ryan Foster</h5>
-													<p>Oslo, Norway</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-4.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Mildred Bennett</h5>
-													<p>London, United Kingdom</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
+								
+											{% endfor %}
 										</div>
 									</div>
 								</div>
@@ -427,7 +390,6 @@ body {
 									</div>						
 									<div class="discussions">
 										<h1>Discussions</h1>
-
 									<!-- <div class="box">
 										<input type="checkbox" id="like" class="field-reactions">
 										<h3 class="text-desc">Press space and after tab key to navigation</h3>
@@ -443,14 +405,14 @@ body {
 									</div> -->
 									<div class="list-group" id="chats" role="tablist">
 
-											{% for u in all_usr %}
+											{% for u in all_usr.friends.all %}
 
 												{% if u.username == usr2.username %}
-													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single active" id="msg__{{u.username}}">
+													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single active" id="msg__{{u.user.username}}">
 												{% else %}
-													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single" id="msg__{{u.username}}">
+													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single" id="msg__{{u.user.username}}">
 												{% endif %}
-													<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
+													<img class="avatar-md" src="/{{u.prof_image}}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
 													<div class="status">
 														<i class="material-icons online">fiber_manual_record</i>
 													</div>
@@ -458,15 +420,15 @@ body {
 														<span>+7</span>
 													</div>
 													<div class="data">
-														<h5>{{u.username|capfirst}}</h5>
+														<h5>{{u.user.username|capfirst}}</h5>
 														<span>Mon</span>
-														<p id="{{u.username}}_message">
+														<p id="{{u.user.username}}_message" style="color:rgb(158, 157, 157);"><b>
 															{% for m in msgs %}
 																{% if m.sender == u or m.receiver == u %}
-																	{{m.message}}
+																	{{m.message|truncatechars:25}}
 																{% endif %}
 															{% endfor %}
-														</p>
+														</b></p>
 													</div>
 												</a>
 											{% endfor %}
@@ -505,102 +467,66 @@ body {
 									<div class="notifications">
 										<h1>Notifications</h1>
 										<div class="list-group" id="alerts" role="tablist">
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
+											
+											{% for notification in notifications %}
+												<a href="#" class="filterNotifications all latest notification" data-toggle="list">
+													<img class="avatar-md" src="/{{notification.from_user.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{notification.from_user.user.username|capfirst}}" alt="avatar">
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="data">
+														<p>{{notification.message|capfirst}}.</p>
+														<span>{{notification.created_at}}</span>
+													</div>
+													<div class="">
+														<button class="btn btn-secondary" style="background-color:#00b797" data-toggle="modal" data-target="#notif_{{notification.id}}" >view</button>
+													</div>
+												</a>
+
+											<div id="notif_{{notification.id}}" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+												<div class="modal-dialog modal-dialog-centered" role="document">
+													<div class="requests">
+														<div class="title">
+															<!-- <h1>Add your friends</h1> -->
+															<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+														</div>
+														<div class="content">
+																<div class="form-group">
+																	<center>
+																		<img class="avatar-lg" src="/{{notification.from_user.prof_image}}" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																		<br><h5 style="color:rgb(20, 20, 20)"><b>{{notification.from_user.user.username|capfirst}}</b></h5>
+																	</center>
+																</div>
+																<div class="form-group">
+																	<h5 id="{{notification.id}}__msg"><b>{{notification.message|capfirst}}</b></h5>
+																</div>
+																{% if notification.notification_type == "Friend Request" %}
+																	{% with notif_msg=notification.message %}
+																		{% if "Rejected" not in notif_msg and "Accepted" not in notif_msg %}
+																			<div class="row" id="notifBtn_{{notification.id}}">
+																				<div class="col-md-5">
+																					<button type="submit" onclick="notification_form('{{notification.id}}','{{notification.from_user.id}}','Accepted');" style="background-color:#17cf60;" class="btn button w-100">Accept</button>
+																				</div>
+																				<div class="col-md-5">
+																					<button type="submit" onclick="notification_form('{{notification.id}}','{{notification.from_user.id}}','Rejected');" style="background-color:#ff4848;" class="btn button w-100">Reject</button>
+																				</div>
+																			</div>
+																		{% endif %}
+																	{% endwith %}
+																{% endif %}
+														</div>
+													</div>
 												</div>
-												<div class="data">
-													<p>Janette has accepted your friend request on Swipe.</p>
-													<span>Oct 17, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Michael, you have a new friend suggestion today.</p>
-													<span>Jun 21, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Mariette have just sent you a new message.</p>
-													<span>Feb 15, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Louis has a birthday today. Wish her all the best.</p>
-													<span>Mar 23, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Harmony has accepted your friend request on Swipe.</p>
-													<span>Jan 5, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Keith have just sent you a new message.</p>
-													<span>Dec 22, 2017</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Michael, you have a new friend suggestion today.</p>
-													<span>Nov 29, 2017</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Ryan have just sent you a new message.</p>
-													<span>Sep 31, 2017</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-4.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Mildred has a birthday today. Wish him all the best.</p>
-													<span>Jul 19, 2017</span>
-												</div>
-											</a>
+											</div>
+
+											{% endfor %}
+
 										</div>
 									</div>
 								</div>
 								<!-- End of Notifications -->
 								<!-- Start of Settings -->
-								<div class="tab-pane fade" id="settings">			
+								<div class="tab-pane fade" id="settings">
 									<div class="settings">
 										<div class="profile">
 											<img class="avatar-xl" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" alt="avatar">
@@ -914,16 +840,6 @@ body {
 														</div>
 														<div class="set">
 															<div class="details">
-																<h5>My Friends Are Nice</h5>
-																<p>If enabled scans direct messages from everyone unless they are listed as your friend.</p>
-															</div>
-															<label class="switch">
-																<input type="checkbox" checked>
-																<span class="slider round"></span>
-															</label>
-														</div>
-														<div class="set">
-															<div class="details">
 																<h5>Everyone can add me</h5>
 																<p>If enabled anyone in or out your friends of friends list can send you a friend request.</p>
 															</div>
@@ -987,36 +903,6 @@ body {
 					</div>
 				</div>
 				<!-- End of Sidebar -->
-				<!-- Start of Add Friends -->
-				<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog modal-dialog-centered" role="document">
-						<div class="requests">
-							<div class="title">
-								<h1>Add your friends</h1>
-								<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
-							</div>
-							<div class="content">
-								<form>
-									<div class="form-group">
-										<label for="user">Username:</label>
-										<input type="text" class="form-control" id="user" placeholder="Add recipient..." required>
-										<div class="user" id="contact">
-											<img class="avatar-sm" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" alt="avatar">
-											<h5>Keith Morris</h5>
-											<button class="btn"><i class="material-icons">close</i></button>
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="welcome">Message:</label>
-										<textarea class="text-control" id="welcome" placeholder="Send your welcome message...">Hi Keith, I'd like to add you as a contact.</textarea>
-									</div>
-									<button type="submit" class="btn button w-100">Send Friend Request</button>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- End of Add Friends -->
 				<!-- Start of Create Chat -->
 				<div class="modal fade" id="startnewchat" tabindex="-1" role="dialog" aria-hidden="true">
 					<div class="modal-dialog modal-dialog-centered" role="document">
@@ -1061,12 +947,12 @@ body {
 									<div class="container">
 										<div class="col-md-12">
 											<div class="inside">
-												<a href="#"><img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
+												<a href="#"><img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
 												<div class="status">
 													<i class="material-icons online">fiber_manual_record</i>
 												</div>
 												<div class="data">
-													<h5><a href="#">Keith Morris</a></h5>
+													<h5>{{usr2.user.username|capfirst}}</h5>
 													<span>Active now</span>
 												</div>
 												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-30">phone_in_talk</i></button>
@@ -1100,11 +986,12 @@ body {
 												<span>Today</span>
 												<hr>
 											</div> -->
+
 											{% for m in msg %}
 												<!-- {{m.sender.username}} -- {{request.user.username}} -->
-												{% if m.sender.username != request.user.username %}
-													<div class="message">
-														<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip_{{m.id}}" data-placement="top_{{m.id}}" title="{{m.username|capfirst}}" alt="avatar">
+												{% if m.sender.user.username != request.user.username %}
+													<div class="message" id="msgs_{{m.id}}">
+														<img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip_{{m.id}}" data-placement="top_{{m.id}}" title="{{m.username|capfirst}}" alt="avatar">
 														<div class="text-main">
 															<div class="text-group">
 																<div class="text">
@@ -1122,23 +1009,51 @@ body {
 														</div>
 													</div>
 												{% else %}
-													<div class="message me">
-														<div class="text-main">
-															<div class="text-group me">
-																<div class="text me">
-																	{% if m.receiver == m.seen_by_users %}
-																		<p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}} seen</p>
-																	{% else %}
-																		<p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}}</p>
-																	{% endif %}
+												<div class="message me" id="msgs_{{m.id}}">
+													<div class="text-main">
+														<div class="text-group me">
+															<div class="text me">
+																<!-- <p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}}</p>
+																<button onclick="MessageDelete('{{m.id}}','{{usr2.id}}')">delete</button> -->
+																	<div class="dropdown" style="width:10%;margin-left:-15px;">
+																			<a href="#" onclick="myFunction('dropdown_{{m.id}}')"><i class="material-icons sm-30 dropbtn" style="font-size:smaller;color:white;">more_vert</i></a>
+																			<div id="dropdown_{{m.id}}" class="dropdown-content">
+																			<a onclick="Edit_Message('{{m.id}}')" href="#">Edit</a>
+																			<a onclick="MessageDelete('{{m.id}}','{{usr2.id}}')" href="#">Delete</a>
+																			<a href="#reply">Reply</a>
+																		</div>
+																	</div>
+																	<p id="msg_{{m.id}}" style="color:white;margin-top:-25px;">
+																		{{m.message}}</p>
 																</div>
-															</div>
-															<span><i class="material-icons">check</i>{{m.date}}</span>
+																	</div>
+																{% if m.receiver == m.seen_by_users %}
+																<span>
+																	<svg id="msg_tick_{{m.id}}" style="color:skyblue" viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none">
+																		<path d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path>
+																	</svg>
+																	{% else %}							
+																	<svg id="msg_tick_{{m.id}}" viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none">
+																		<path d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path>
+																	</svg>
+																	{% endif %}
+															{{m.date}}</span>
+													</div>
+												</div>
+												<!-- <p id="msg_{{m.id}}">
+													<div class="dropdown">
+															<a href="#" onclick="myFunction()"><i class="material-icons sm-30 dropbtn" style="font-size:smaller;">more_vert</i></a>
+															<div id="myDropdown" class="dropdown-content">
+															<a onclick="Edit_Message('{{m.id}}')" href="#">Edit</a>
+															<a onclick="MessageDelete('{{m.id}}','{{usr2.id}}')" href="#">Delete</a>
+															<a href="#reply">Reply</a>
 														</div>
 													</div>
+													{{m.message}}</p> -->
+							
 												{% endif %}
 											{% endfor %}
-											
+																				
 											<div class="message" id="typing_div" style="display:none;">
 												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
 												<div class="text-main">
@@ -1165,7 +1080,7 @@ body {
 												<button type="submit" class="btn send"><i class="material-icons">send</i></button>
 											</form>
 											<label>
-												<input type="file">
+												<input id="files_input" type="file">
 												<span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
 											</label> 
 										</div>
@@ -1374,33 +1289,146 @@ body {
 			scrollToBottom(document.getElementById('content'));
 		</script>
 
-
-
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script type="text/javascript">
     // let url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"abcd"
     let url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{usr.id}}_{{usr2.id}}"
-    let users_chatsocket_url = "ws://" + window.location.host +"/ws/user_chat/room_id="+"{{usr.id}}"
+    let users_chatsocket_url = "ws://" + window.location.host +"/ws/user_chat/room_id="+"{{usr.user.id}}"
 	let message_edit = false
 	let message_id = ""
 	let msg_audio = new Audio(window.location.origin + "/static/audio/msg_sound.wav");
     const chatSocket = new WebSocket(url)
-	let m_audio = false
-
-	// chatSocket.send(JSON.stringify({
-	// 			'username':"{{usr.username}}",
-	// 			"message_seen":"Yes seen"
-	// 		}))
-
     const UserchatSocket = new WebSocket(users_chatsocket_url)
+	let m_audio = false
+    let freq_form = document.getElementById("freq_form")
+
+	function notification_form(id, user_id, decision){
+
+		let msg = document.getElementById(id+'__msg');
+		console.log("Called");
+		console.log(decision);
+		
+		UserchatSocket.send(JSON.stringify({
+				'from_user':"{{usr.id}}",
+				'to_user':user_id,
+				'decision':decision,
+				'notification_id':id,
+				'type':'friend_request_response'
+		}))
+
+		let notif_btns = document.getElementById('notifBtn_'+id);
+		notif_btns.remove(notif_btns.firstElementChild)
+
+		msg.innerHTML = '<b>You have ' + decision + ' this friend request</b>'
+		
+
+	}
+
+	function friend_form(id,user_id){
+		let freq_form = document.getElementById(id);
+		let freq_msg = document.getElementById("freq_msg_"+user_id);
+		console.log("User id : " + user_id)
+		console.log("Message : " + freq_msg.value)
+		console.log("Yes Submitted")
+
+			UserchatSocket.send(JSON.stringify({
+				'from_user':"{{usr.id}}",
+				'to_user':user_id,
+				'message':freq_msg.value,
+				'type':'friend_request_send'
+			}))
+
+		freq_form.reset();
+	}
+
+
+	function ShowNotifications(user,message){
+		const  notification = new Notification(
+			"New message from " + user,{
+			body:message,
+			// icon:"{% static 'dist/img/avatars/avatar-male-1.jpg' %}"
+		});
+	}
+
+	function CheckNotificaion(user,message){
+		if (Notification.permission == "granted"){
+			// console.log(Notification.permission);
+			ShowNotifications(user,message);
+		}
+		else if(Notification.permission != "denied"){
+			Notification.requestPermission().then(permission =>{
+				// console.log(permission);
+				if (permission =="granted"){
+					ShowNotifications(user,message);
+				}
+			});
+		}
+	}
+
+
+	function MessageDelete(msg_id,user_id){
+		document.getElementById('msgs_'+msg_id).remove();
+			UserchatSocket.send(JSON.stringify({
+				'from_user':"{{usr.id}}",
+				'to_user':user_id,
+				'msg_id':msg_id,
+				'type':'message_deletion'
+			}))
+	}
+
 
 	UserchatSocket.onmessage = function(e){
-        let data = JSON.parse(e.data)
+		let data = JSON.parse(e.data)
         console.log('-----------NOTIF------------');
 		console.log('Data:', data);
-		console.log(data.message.my_sender)
-		ShiftUp(data.message.my_sender);
+
+		if (data.message.notification_type == "message_notification"){
+			ShiftUp(data.message.my_sender);
+			document.getElementById( data.message.my_sender + "_message").innerHTML = "<b style='color:black'>"+data.message.message+"</b>";
+		}
+		else if(data.message.notification_type == "Friend Request"){
+			console.log("Friend Request from " + data.message.from_user);
+
+			document.getElementById("alerts").innerHTML += '<a href="#" class="filterNotifications all latest notification active show" data-toggle="list">'+
+				'<img class="avatar-md" src="/'+data.message.from_user_image+'" data-toggle="tooltip" data-placement="top" title="" alt="avatar" data-original-title="Admin2">'+
+				// '<img class="avatar-md" src="C:\\Users\\DELL\\Desktop\\Projects\\Chat App\\chatapp\\static\\avatar-male-4_Kg5jKe3.jpg" data-toggle="tooltip" data-placement="top" title="" alt="avatar" data-original-title="Admin2">'+
+				'<div class="status">'+
+					'<i class="material-icons online">fiber_manual_record</i>'+
+				'</div>'+
+				'<div class="data">'+
+					'<p>'+ data.message.message +'</p>'+
+					'<span>'+data.message.created_at+'</span>'+
+				'</div>'+
+				'<div class="">'+
+					'<button class="btn btn-secondary" style="background-color:#00b797" data-toggle="modal" data-target="#notif_34">view</button>'+
+				'</div>'+
+			'</a>'
+
+		}
+		else if (data.message.notification_type == "Friend Request Response"){
+			console.log("Friend Request Response : " + data.message.from_user);
+
+			document.getElementById("alerts").innerHTML += '<a href="#" class="filterNotifications all latest notification active show" data-toggle="list">'+
+				'<img class="avatar-md" src="/'+data.message.from_user_image+'" data-toggle="tooltip" data-placement="top" title="" alt="avatar" data-original-title="Admin2">'+
+				// '<img class="avatar-md" src="C:\\Users\\DELL\\Desktop\\Projects\\Chat App\\chatapp\\static\\avatar-male-4_Kg5jKe3.jpg" data-toggle="tooltip" data-placement="top" title="" alt="avatar" data-original-title="Admin2">'+
+				'<div class="status">'+
+					'<i class="material-icons online">fiber_manual_record</i>'+
+				'</div>'+
+				'<div class="data">'+
+					'<p>'+ data.message.message +'</p>'+
+					'<span>'+data.message.created_at+'</span>'+
+				'</div>'+
+				'<div class="">'+
+					'<button class="btn btn-secondary" style="background-color:#00b797" data-toggle="modal" data-target="#notif_34">view</button>'+
+				'</div>'+
+			'</a>'
+		}
+		else if(data.notification_type == "Remove_message"){
+			console.log("Deleting Message");
+			console.log(document.getElementById('msgs_'+data.message.msg_id));
+			document.getElementById('msgs_'+data.message.msg_id).remove();
+		}
 		console.log('-----------NOTIF------------');
-		document.getElementById( data.message.my_sender + "_message").innerHTML = "<b>"+data.message.message+"</b>";
 		msg_audio.play();
 	}
 
@@ -1423,9 +1451,6 @@ body {
 		if(data.type == "chat"){
             let msgs = document.getElementById("msg_body")
 			if(data.username == "{{request.user.username}}"){
-				if(data.seen == "Yes"){
-					data.message = data.message + " Seen"
-				}
 				msgs.innerHTML += '<div class="message me">'+
 									'<div class="text-main">'+
 										'<div class="text-group me">'+
@@ -1433,12 +1458,20 @@ body {
 													'<p id="msg_'+ data.messageId +'">'+ data.message +'</p>'+
 											'</div>'+
 										'</div>'+
-										'<span><i class="material-icons">check</i>'+ new Date().toLocaleTimeString(); +'</span>'
+										'<span> <svg id="msg_tick_' + data.messageId + '" viewBox="0 0 16 11" height="11" width="16" preserveAspectRatio="xMidYMid meet" class="" fill="none">'
+																	+'<path d="M11.0714 0.652832C10.991 0.585124 10.8894 0.55127 10.7667 0.55127C10.6186 0.55127 10.4916 0.610514 10.3858 0.729004L4.19688 8.36523L1.79112 6.09277C1.7488 6.04622 1.69802 6.01025 1.63877 5.98486C1.57953 5.95947 1.51817 5.94678 1.45469 5.94678C1.32351 5.94678 1.20925 5.99544 1.11192 6.09277L0.800883 6.40381C0.707784 6.49268 0.661235 6.60482 0.661235 6.74023C0.661235 6.87565 0.707784 6.98991 0.800883 7.08301L3.79698 10.0791C3.94509 10.2145 4.11224 10.2822 4.29844 10.2822C4.40424 10.2822 4.5058 10.259 4.60313 10.2124C4.70046 10.1659 4.78086 10.1003 4.84434 10.0156L11.4903 1.59863C11.5623 1.5013 11.5982 1.40186 11.5982 1.30029C11.5982 1.14372 11.5348 1.01888 11.4078 0.925781L11.0714 0.652832ZM8.6212 8.32715C8.43077 8.20866 8.2488 8.09017 8.0753 7.97168C7.99489 7.89128 7.8891 7.85107 7.75791 7.85107C7.6098 7.85107 7.4892 7.90397 7.3961 8.00977L7.10411 8.33984C7.01947 8.43717 6.97715 8.54508 6.97715 8.66357C6.97715 8.79476 7.0237 8.90902 7.1168 9.00635L8.1959 10.0791C8.33132 10.2145 8.49636 10.2822 8.69102 10.2822C8.79681 10.2822 8.89838 10.259 8.99571 10.2124C9.09304 10.1659 9.17556 10.1003 9.24327 10.0156L15.8639 1.62402C15.9358 1.53939 15.9718 1.43994 15.9718 1.32568C15.9718 1.1818 15.9125 1.05697 15.794 0.951172L15.4386 0.678223C15.3582 0.610514 15.2587 0.57666 15.1402 0.57666C14.9964 0.57666 14.8715 0.635905 14.7657 0.754395L8.6212 8.32715Z" fill="currentColor"></path>'
+																+'</svg>'+
+											 new Date().toLocaleTimeString(); +'</span>'
 									+'</div></div>'
+
+				if(data.seen == "Yes"){
+					document.getElementById("msg_tick_" + data.messageId).style.color = "skyblue";
+				}
+
 			}
 			else{
 				msgs.innerHTML +=   '<div class="message">'+
-										'<img class="avatar-md" src="{% static "dist/img/avatars/avatar-female-5.jpg" %}" data-toggle="tooltip" data-placement="top" title="{{m.username|capfirst}}" alt="avatar">'+
+										'<img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{m.username|capfirst}}" alt="avatar">'+
 										'<div class="text-main">'+
 											'<div class="text-group">'+
 												'<div class="text">'+
@@ -1449,6 +1482,7 @@ body {
 										'</div>'+
 									'</div>'
 				m_audio = true;
+				CheckNotificaion(data.username,data.message);
 			}
 
 			if (m_audio == true){
@@ -1463,8 +1497,7 @@ body {
 				document.getElementById("msg_" + data.msg_id ).innerHTML = data.message;
 			}
 			else{
-				document.getElementById("msg_" + data.msg_id ).innerHTML = '<a href="#" onclick="Edit_Message(' + data.msg_id +
-				')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a>' + data.message;
+				document.getElementById("msg_" + data.msg_id ).innerHTML = data.message;
 			}
 		}
 
@@ -1482,9 +1515,11 @@ body {
 		else if(data.type == "message_seen"){
 			console.log(data)
 			for(i=0; i<data.messages_seen.length; i++){
-				console.log("Make these Messages seen")
-				console.log(data.messages_seen[i])
-				document.getElementById("msg_" + data.messages_seen[i]).innerHTML += " seen"
+				console.log("Make these Messages seen");
+				console.log(data.messages_seen[i]);
+				console.log(data.messages_seen[i]);
+				// document.getElementById("msg_" + data.messages_seen[i]).innerHTML += " seen"
+				document.getElementById("msg_tick_" + data.messages_seen[i]).style.color = "skyblue";
 				console.log("Make these Messages seen")
 			}
 
@@ -1503,7 +1538,7 @@ body {
 		// if(typing_div == "none"){
 			chatSocket.send(JSON.stringify({
 				'typing':'yes',
-				'username':"{{usr.username}}",
+				'username':"{{usr.user.username}}",
 				"room_id":"{{usr.id}}_{{usr2.id}}"
 			}))
 		// }
@@ -1511,39 +1546,67 @@ body {
 
 	function Edit_Message(msg_id){
 		message_id = msg_id;
-		console.log(message_id)
+		console.log(message_id);
 	}
 
-
+	// Message Submit form
 	form.addEventListener('submit', (e)=>{
         e.preventDefault();
 		let message = document.getElementById("message_text").value
-
+		let file_input = document.getElementById("files_input")
 
 			chatSocket.send(JSON.stringify({
 				"message_id":message_id,
 				'message':message,
-				'username':"{{usr.username}}",
-				'receiver':"{{usr2.id}}",
-				"room_id":"{{usr.id}}_{{usr2.id}}"
+				'file_input':file_input.files[0],
+				'username':"{{usr.user.username}}",
+				'receiver':"{{usr2.user.id}}",
+				"room_id":"{{usr.user.id}}_{{usr2.user.id}}"
 			}))
-
-			// else if(message_edit == true){
-		// 	chatSocket.send(JSON.stringify({
-		// 		'message':message,
-		// 		'username':"{{usr.username}}",
-		// 		'receiver':"{{usr2.id}}",
-		// 		"room_id":"{{usr.id}}_{{usr2.id}}"
-		// 	}))
-		// }
-
         form.reset();
 		message_id = ""
+
+		var formdata = new FormData();
+
+		formdata.append("files", file_input.files[0]);
+		formdata.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+
+		$.ajax({
+			method: "POST",
+			url : "/post_files",
+			processData: false,
+			contentType: false,
+			mimeType: "multipart/form-data",
+			data : formdata,
+			success: function(res) {
+				console.log("Successfull Response..!!!")
+			}
+		});
     })
 
 
-	</script>
 
+
+
+
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+function myFunction(id) {
+  document.getElementById(id).classList.toggle("show");
+}
+
+	</script>
 
 	</body>
 

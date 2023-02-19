@@ -1,10 +1,10 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
-from .models import Message, MessageRoom
+from .models import FriendRequest, Message, MessageRoom, Notification, UserProfile
 from django.contrib.auth.models import User
 from django.core import serializers
-# from channels_presence.models import Room
+from django.db.models import Q
 # import time
 
 class ChatConsumer(WebsocketConsumer):
@@ -12,6 +12,8 @@ class ChatConsumer(WebsocketConsumer):
     def connect(self):
 
         r_id = self.scope['path'].split('socket-server/room_id=')[1].split("_")
+        print(r_id[0])
+
         group_name = self.GetGroupName(r_id[0], r_id[1])
         usr_id = self.scope["user"]._wrapped.id
         self.MessageRoomUsers(usr_id, group_name, "Add")
@@ -35,7 +37,7 @@ class ChatConsumer(WebsocketConsumer):
     def MessageRoomUsers(self, usr_id, msg_room, action):
 
         print(usr_id)
-        usr = User.objects.get(id=usr_id)
+        usr = UserProfile.objects.get(id=usr_id)
         if action == "Add":
             print("User Joined")
             msg_room.users_active.add(usr)
@@ -50,7 +52,7 @@ class ChatConsumer(WebsocketConsumer):
                 async_to_sync(self.channel_layer.group_send)(
                 room_group_name,{
                     "type":"message_seen",
-                    "my_user":usr.username,
+                    "my_user":usr.user.username,
                     "m_none":m_none_arr
                 })
                 msg = Message.objects.filter(receiver=usr,seen_by_users=None).all().update(seen_by_users=usr)
@@ -113,7 +115,6 @@ class ChatConsumer(WebsocketConsumer):
             if not msg_id:
 
                 msg_created = self.save_messages(username,receiver,room_id,msg)
-                
                 print(msg_created)
                 print(msg)
                 async_to_sync(self.channel_layer.group_send)(
@@ -162,29 +163,23 @@ class ChatConsumer(WebsocketConsumer):
         room_id = event['room_id']
         msg_obj = event['msg_created']
         print(room_id)
-        receiver = User.objects.get(id=receiver)
+
+        receiver = UserProfile.objects.get(user_id=receiver)
         # msg_room = self.GetGroupName(room_id[0], room_id[1])
 
+        seen_by_user = "No"
         if receiver == msg_obj.seen_by_users:
-            self.send(
-                text_data=json.dumps({
-                    'type':'chat',
-                    'message':msg,
-                    'messageId':msg_obj.id,
-                    'username':username,
-                    "seen":"Yes"
-                })
-            )
-        else:
-            self.send(
-                text_data=json.dumps({
-                    'type':'chat',
-                    'message':msg,
-                    'messageId':msg_obj.id,
-                    'username':username,
-                    "seen":"No"
-                })
-            )
+            seen_by_user = "Yes"
+
+        self.send(
+            text_data=json.dumps({
+                'type':'chat',
+                'message':msg,
+                'messageId':msg_obj.id,
+                'username':username,
+                "seen":seen_by_user
+            })
+        )
 
 
     def typing_message(self, event):
@@ -203,8 +198,8 @@ class ChatConsumer(WebsocketConsumer):
 
 
     def save_messages(self, username, receiver, room, msg):
-        sender = User.objects.filter(username=username).first()
-        receiver = User.objects.filter(id=receiver).first()
+        sender = UserProfile.objects.filter(user__username=username).first()
+        receiver = UserProfile.objects.filter(user_id=receiver).first()
         room = self.GetGroupName(room[0], room[1])
 
         created = Message.objects.create(sender=sender,receiver=receiver,room=room,message=msg)
@@ -233,7 +228,6 @@ class UserChatConsumer(WebsocketConsumer):
 
         r_id = self.scope['path'].split('/ws/user_chat/room_id=')[1]
         # group_name = self.GetGroupName(r_id[0], r_id[1])
-        # self.room_name = "test_room"
         self.room_group_name = f"notif{r_id}"
 
         async_to_sync(self.channel_layer.group_add)(
@@ -247,11 +241,53 @@ class UserChatConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        from_user = UserProfile.objects.filter(id=text_data_json['from_user']).first()
+        to_user =  UserProfile.objects.filter(id=text_data_json['to_user']).first()
+        notif_type = text_data_json['type']
+        print(text_data_json)
+
+        if notif_type == "friend_request_response":
+            f = FriendRequest.objects.filter(from_user=to_user, to_user=from_user).first()
+            msgs = f"You have {text_data_json['decision']} this friend request."
+            n = Notification.objects.filter(id=int(text_data_json['notification_id'])).update(message=msgs)
+            f.status = text_data_json['decision']
+            f.save()
+            if text_data_json['decision'] == "Accepted":
+                to_user.friends.add(from_user)
+                from_user.friends.add(to_user)
+            
+        elif notif_type == "friend_request_send":
+            message = text_data_json['message']
+            if not FriendRequest.objects.filter(Q(from_user=from_user, to_user=to_user)|Q(from_user=to_user, to_user=from_user)):
+                friend_request = FriendRequest.objects.create(from_user=from_user, to_user=to_user, message=message)
+        elif notif_type == "message_deletion":
+            msg_id = text_data_json['msg_id']
+            Message.objects.filter(id=msg_id).delete()
+            print("-------Mssage deleting Conusmers----------")
+            receiver_group_name = f"notif{to_user.user.id}"
+            print("-------Mssage deleting Conusmers----------")
+            async_to_sync(self.channel_layer.group_send)(
+                receiver_group_name,
+                {
+                    'type':'Remove_message',
+                    'msg_id':msg_id,
+                }
+            )
+    
+    def Remove_message(self, event):
+
+        self.send(
+            text_data=json.dumps({
+                'notification_type':'Remove_message',
+                'message':event,
+            })
+        )
+
 
     def send_notification(self, event):
-        # print("-----Notif------")
-        # print(event)
-        # print("-----Notif------")
+        print("-----Notif------")
+        print(event)
+        print("-----Notif------")
         self.send(
             text_data=json.dumps({
                 'type':'notifications',
