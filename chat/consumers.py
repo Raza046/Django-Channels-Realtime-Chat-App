@@ -3,7 +3,6 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from .models import FriendRequest, Message, MessageRoom, Notification, UserProfile
 from django.contrib.auth.models import User
-from django.core import serializers
 from django.db.models import Q
 # import time
 
@@ -12,9 +11,15 @@ class ChatConsumer(WebsocketConsumer):
     def connect(self):
 
         r_id = self.scope['path'].split('socket-server/room_id=')[1].split("_")
+        print("------REQUEST--------")
         print(r_id[0])
+        print("------REQUEST--------")
 
-        group_name = self.GetGroupName(r_id[0], r_id[1])
+        try:
+            group_name = MessageRoom.GetGroupName(r_id[0], r_id[1])
+        except:
+            group_name = MessageRoom.objects.filter(group_name=r_id[0]).first()
+            
         usr_id = self.scope["user"]._wrapped.id
         self.MessageRoomUsers(usr_id, group_name, "Add")
 
@@ -27,20 +32,15 @@ class ChatConsumer(WebsocketConsumer):
 
         self.accept()
 
-        # self.send(
-        #     text_data=json.dumps({
-        #         'type':'Connection Established!',
-        #         'message':'You are now connected Sir!'
-        #     })
-        # )
-
     def MessageRoomUsers(self, usr_id, msg_room, action):
 
-        print(usr_id)
+        # print(usr_id)
         usr = UserProfile.objects.get(id=usr_id)
         if action == "Add":
-            print("User Joined")
-            msg_room.users_active.add(usr)
+            # print("User Joined")
+            if usr not in msg_room.users_active.all():
+                msg_room.users_active.add(usr)
+
             room_group_name = f"chat_{msg_room.group_name}"
             m_none = Message.objects.filter(receiver=usr,seen_by_users=None).all()
             m_none_arr = []
@@ -75,20 +75,9 @@ class ChatConsumer(WebsocketConsumer):
             )
 
 
-    def GetGroupName(self, id1, id2):
-
-        m1 = MessageRoom.objects.filter(first_user_id__in=id1, second_user_id__in=id2).first()
-        m2 = MessageRoom.objects.filter(first_user_id__in=id2, second_user_id__in=id1).first()
-
-        if m1:
-            print("Room_id Exists 1= " + str(m1))
-            group_name = m1
-        elif m2:
-            print("Room_id Exists 2= " + str(m2))
-            group_name = m2
-
-        return group_name
-
+    # def GetGroupName(self, id1, id2):
+    #     msg_room = MessageRoom.objects.filter(Q(first_user_id__in=id1,second_user_id__in=id2) | Q(first_user_id__in=id2, second_user_id__in=id1)).first()
+    #     return msg_room
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -200,7 +189,7 @@ class ChatConsumer(WebsocketConsumer):
     def save_messages(self, username, receiver, room, msg):
         sender = UserProfile.objects.filter(user__username=username).first()
         receiver = UserProfile.objects.filter(user_id=receiver).first()
-        room = self.GetGroupName(room[0], room[1])
+        room = MessageRoom.GetGroupName(room[0], room[1])
 
         created = Message.objects.create(sender=sender,receiver=receiver,room=room,message=msg)
         msg_obj = Message.objects.get(id=created.id)
@@ -217,7 +206,7 @@ class ChatConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         # Called when the socket closes
         r_id = self.scope['path'].split('socket-server/room_id=')[1].split("_")
-        group_name = self.GetGroupName(r_id[0], r_id[1])
+        group_name = MessageRoom.GetGroupName(r_id[0], r_id[1])
         usr_id = self.scope["user"]._wrapped.id
         self.MessageRoomUsers(usr_id, group_name, "Remove")
 
@@ -255,6 +244,8 @@ class UserChatConsumer(WebsocketConsumer):
             if text_data_json['decision'] == "Accepted":
                 to_user.friends.add(from_user)
                 from_user.friends.add(to_user)
+                # FIEDNS ACCEPTED
+                MessageRoom.objects.create(first_user=from_user, second_user=to_user)
             
         elif notif_type == "friend_request_send":
             message = text_data_json['message']

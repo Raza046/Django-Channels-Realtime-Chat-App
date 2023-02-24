@@ -1,4 +1,3 @@
-import json
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -6,12 +5,21 @@ from django.dispatch import receiver
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.urls import reverse
+from django.db.models import Q
+
+# class CommonFields(models.Model):
+#     message = models.TextField()
+
+#     class Meta:
+#         abstract = True
+
 
 class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     prof_image = models.FileField(upload_to="static")
     friends = models.ManyToManyField("UserProfile", related_name=("user_friends"), blank=True)
+    block_users = models.ManyToManyField("UserProfile", related_name=("blocked_users"), blank=True)
     address = models.TextField()
     city = models.CharField(max_length=200, null=True)
     country = models.CharField(max_length=200, null=True)
@@ -120,8 +128,6 @@ class Message(models.Model):
     # reaction = models.CharField(max_length=150, null=True)
     date = models.DateField(auto_now_add=True)
 
-# create a reciever field here and then send the json data into the chat consumer. Then to the frontend.
-# lets go
 
 @receiver(post_save, sender=Message)
 def MesageNotification(sender, instance, created, **kwargs):
@@ -152,23 +158,64 @@ def async_function(user_group, instance):
     print(f"Sending notification to {user_group}")
 
 
+# Create a Message Group an add fields admin_user, created, group_image
+
 class MessageRoom(models.Model):
 
     group_name = models.CharField(max_length=150)
     first_user = models.ForeignKey(UserProfile, related_name=("first_user"), on_delete=models.CASCADE)
-    second_user = models.ForeignKey(UserProfile, related_name=("second_user"), on_delete=models.CASCADE)
-    users_active = models.ManyToManyField(UserProfile)
+    second_user = models.ForeignKey(UserProfile, related_name=("second_user"), on_delete=models.CASCADE,null=True, blank=True)
+    users_active = models.ManyToManyField(UserProfile,blank=True)
+    one_to_one = models.BooleanField(default=True)
+    group = models.OneToOneField("MessageGroup", on_delete=models.CASCADE, related_name="message_groups", null=True, blank=True)
 
     def __str__(self):
-        return f'{self.first_user.user} -- {self.second_user.user}'
+        if self.one_to_one:
+            return f'{self.first_user.user} -- {self.second_user.user}'
+        else:
+            return f'{self.group_name}'
+
+    
+    @property
+    def LatestMessage(self):
+        latest_msg = Message.objects.filter(room_id=self.id).last()
+        return latest_msg
+
+
+    @staticmethod
+    def GetGroupName(id1, id2):
+        msg_room = MessageRoom.objects.filter(Q(first_user_id=id1,second_user_id=id2) | Q(first_user_id=id2, second_user_id=id1)).first()
+        return msg_room
 
 @receiver(post_save, sender=MessageRoom)
 def CreateGroupName(sender, instance, created, **kwargs):
-    if created:
+    if created and instance.one_to_one is True:
         f_user = instance.first_user.user.username
         s_user = instance.second_user.user.username
         g_n = f"{f_user}_{s_user}_{instance.first_user.user.id}_{instance.second_user.user.id}"
-        m_room = MessageRoom.objects.filter(id=instance.id).update(group_name=g_n)
+        MessageRoom.objects.filter(id=instance.id).update(group_name=g_n)
+    elif created and instance.one_to_one is False:
+        print("_____CREATING MESSAGE GROUP______")
+        group_obj,m = MessageGroup.objects.get_or_create(group_admin=instance.first_user)
+        instance.group = group_obj
+        instance.save()
+
+
+class MessageGroup(models.Model):
+
+    group_admin = models.ForeignKey(UserProfile, related_name="group_admins", on_delete=models.CASCADE, null=True)
+    created = models.DateField(auto_now_add=True)
+    group_image = models.FileField(upload_to="static")
+
+    class Meta:
+        verbose_name = ("MessageGroup")
+        verbose_name_plural = ("MessageGroups")
+
+    def __str__(self):
+        return self.group_admin.user.username
+
+    def get_absolute_url(self):
+        return reverse("MessageGroup_detail", kwargs={"pk": self.pk})
 
 
 class MessageReaction(models.Model):

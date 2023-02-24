@@ -22,6 +22,6 @@ urlpatterns = [
     path('chatroom/<str:id>', views.ChatRoom, name="chatroom"),
     path('home/', views.HomePageView.as_view(), name="home"),
     path('login/', views.LoginPage, name="login"),
-    path('post_files/', views.FileUpload, name="post_files"),
-    
+    path('post_files/', views.FileUpload.as_view(), name="post_files"),
+
 ]

@@ -321,6 +321,39 @@ body {
 										<button class="btn filterMembersBtn" data-toggle="list" data-filter="offline">Offline</button>
 									</div>
 									<div class="contacts">
+										
+										<!-- CREATE GROUPS MODAL BELOW -->
+										
+										<button class="btn btn-danger" style="background-color:#dc3545;" data-toggle="modal" data-target="#group_id">Create Group</button>
+
+										<div id="group_id" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+											<div class="modal-dialog modal-dialog-centered" role="document">
+												<div class="requests">
+													<div class="title">
+														<h1>Create Groups</h1>
+														<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+													</div>
+													<div class="content">
+															<div class="form-group">
+																<center>
+																	<img class="avatar-lg" src="https://cdn-icons-png.flaticon.com/128/1357/1357616.png" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																	<br><h5 style="color:rgb(20, 20, 20)"><b>{{notification.from_user.user.username|capfirst}}</b></h5>
+																</center>
+															</div>
+															<div class="form-group">
+																<h5 id="{{notification.id}}__msg"><b>{{notification.message|capfirst}}</b></h5>
+															</div>
+													</div>
+												</div>
+											</div>
+										</div>
+
+
+										
+
+
+
+
 										<h1>Contacts</h1>
 										<div class="list-group" id="contacts" role="tablist">
 											{% for users in profiles.all %}
@@ -334,9 +367,11 @@ body {
 														<h5>{{users.user.username}}</h5>
 														<p>{{users.city}}, {{users.country}}</p>
 													</div>
+													{% if users not in user_profile.friends.all %}
 													<div class="">
 														<i data-toggle="modal" data-target="#FriendRequestModal_{{users.id}}" class="material-icons">person_add</i>
 													</div>
+													{% endif %}
 												</a>
 												
 												<div id="FriendRequestModal_{{users.id}}" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -368,7 +403,6 @@ body {
 														</div>
 													</div>
 												</div>
-								
 											{% endfor %}
 										</div>
 									</div>
@@ -405,7 +439,37 @@ body {
 									</div> -->
 									<div class="list-group" id="chats" role="tablist">
 
-											{% for u in all_usr.friends.all %}
+										{% for u in all_rooms.all %}
+										<a href="{% url 'chatroom' u.group_name %}" class="filterDiscussions all unread single active" id="msg__{{u.user.username}}">
+											{% if u.one_to_one == False %}
+											<img class="avatar-md" src="/{{u.group.group_image}}" data-toggle="tooltip" data-placement="top" title="{{u.group_name}}" alt="avatar">
+											{% elif u.first_user.user == request.user %}
+											<img class="avatar-md" src="/{{u.second_user.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{u.second_user.user.username|capfirst}}" alt="avatar">
+											{% elif u.second_user.user == request.user %}
+											<img class="avatar-md" src="/{{u.first_user.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{u.first_user.user.username|capfirst}}" alt="avatar">
+											{% endif %}
+											<div class="status">
+												<i class="material-icons online">fiber_manual_record</i>
+											</div>
+											<div class="new bg-red">
+												<span>+7</span>
+											</div>
+											<div class="data">
+												{% if u.one_to_one == True %}
+												<h5>{{u.second_user.user.username|capfirst}}</h5>
+												{% else %}
+												<h5>{{u.group_name|capfirst}}</h5>
+												{% endif %}
+												<span>Mon</span>
+												<p id="{{u.second_user.user.username}}_message" style="color:rgb(158, 157, 157);"><b>
+													{{u.LatestMessage.message|truncatechars:25}}
+												</b></p>
+											</div>
+										</a>
+										{% endfor %}
+
+
+											<!-- {% for u in all_usr.friends.all %}
 
 												{% if u.username == usr2.username %}
 													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single active" id="msg__{{u.user.username}}">
@@ -431,7 +495,7 @@ body {
 														</b></p>
 													</div>
 												</a>
-											{% endfor %}
+											{% endfor %} -->
 
 											<!-- <a href="#list-empty" class="filterDiscussions all unread single" id="list-empty-list" data-toggle="list" role="tab">
 												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
@@ -947,7 +1011,12 @@ body {
 									<div class="container">
 										<div class="col-md-12">
 											<div class="inside">
-												<a href="#"><img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
+												{% if usr2.one_to_one == False %}
+													<a href="#"><img class="avatar-md" src="/{{usr2.group.group_image}}" data-toggle="tooltip" data-placement="top" title="{{usr2.group_name}}" alt="avatar"></a>
+												{% else %}
+													<a href="#"><img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
+												{% endif %}
+	
 												<div class="status">
 													<i class="material-icons online">fiber_manual_record</i>
 												</div>
@@ -995,14 +1064,16 @@ body {
 														<div class="text-main">
 															<div class="text-group">
 																<div class="text">
-																	<!-- <div class="attachment"> -->
-																		<!-- <button class="btn attach"><i class="material-icons md-18">insert_drive_file</i></button> -->
-																		<!-- <div class="file">
-																			<h5><a href="#">Tenacy Agreement.pdf</a></h5>
-																			<span>24kb Document</span>
-																		</div> -->
-																	<!-- </div> -->
-																		<p id="msg_{{m.id}}">{{m.message}}</p>
+																	{% if m.file %}
+																		<div class="attachment">
+																			<button class="btn attach"><i class="material-icons md-18">insert_drive_file</i></button>
+																			<div class="file">
+																				<h5><a href="/{{m.file}}" download>{{m.file}}</a></h5>
+																				<span>24kb Document</span>
+																			</div>
+																		</div>
+																	{% endif %}
+																	<p id="msg_{{m.id}}">{{m.message}}</p>
 																</div>
 															</div>
 															<span>{{m.date}}</span>
@@ -1013,7 +1084,16 @@ body {
 													<div class="text-main">
 														<div class="text-group me">
 															<div class="text me">
-																<!-- <p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}}</p>
+																	{% if m.file %}
+																		<div class="attachment">
+																			<button class="btn attach"><i class="material-icons md-18">insert_drive_file</i></button>
+																			<div class="file">
+																				<h5><a  href="/{{m.file}}" download>{{m.file}}</a></h5>
+																				<span>24kb Document</span>
+																			</div>
+																		</div>
+																	{% endif %}
+														<!-- <p id="msg_{{m.id}}"><a href="#" onclick="Edit_Message('{{m.id}}')"><i class="material-icons sm-30" style="font-size:smaller;">more_vert</i></a> {{m.message}}</p>
 																<button onclick="MessageDelete('{{m.id}}','{{usr2.id}}')">delete</button> -->
 																	<div class="dropdown" style="width:10%;margin-left:-15px;">
 																			<a href="#" onclick="myFunction('dropdown_{{m.id}}')"><i class="material-icons sm-30 dropbtn" style="font-size:smaller;color:white;">more_vert</i></a>
@@ -1292,7 +1372,15 @@ body {
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script type="text/javascript">
     // let url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"abcd"
-    let url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{usr.id}}_{{usr2.id}}"
+	let url = ""
+	if ("{{usr2.one_to_one}}" == "True"){
+		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{usr.id}}_{{usr2.id}}"
+	}
+	else if ("{{usr2.one_to_one}}" == "False"){
+		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{usr2.group_name}}"
+		console.log("IN else if condition")
+}
+	console.log("URL IS "+url)
     let users_chatsocket_url = "ws://" + window.location.host +"/ws/user_chat/room_id="+"{{usr.user.id}}"
 	let message_edit = false
 	let message_id = ""
@@ -1450,11 +1538,45 @@ body {
 
 		if(data.type == "chat"){
             let msgs = document.getElementById("msg_body")
+
 			if(data.username == "{{request.user.username}}"){
+
+				let file_input = document.getElementById("files_input")
+				var formdata = new FormData();
+				formdata.append("files", file_input.files[0]);
+				formdata.append("message_id",data.messageId);
+				formdata.append("csrfmiddlewaretoken", "{{ csrf_token }}");
+				
+				if (file_input.files[0] != null){
+					$.ajax({
+						method: "POST",
+						url : "/post_files/",
+						processData: false,
+						contentType: false,
+						mimeType: "multipart/form-data",
+						data : formdata,
+						success: function(res) {
+							console.log("Successfull Response..!!!")
+						}
+					});
+
+					file_html =	'<div class="attachment">'+
+									'<button class="btn attach"><i class="material-icons md-18">insert_drive_file</i></button>'+
+										'<div class="file">'+
+											'<h5><a  href="/static/'+file_input.files[0].name+'" download>'+file_input.files[0].name+'</a></h5>'+
+											'<span>24kb Document</span>'+
+										'</div>'+
+									'</div>'
+				} 
+				else{
+					file_html = ""
+				}
+
+
 				msgs.innerHTML += '<div class="message me">'+
 									'<div class="text-main">'+
 										'<div class="text-group me">'+
-											'<div class="text me">'+
+											'<div class="text me">'+ file_html +
 													'<p id="msg_'+ data.messageId +'">'+ data.message +'</p>'+
 											'</div>'+
 										'</div>'+
@@ -1558,7 +1680,7 @@ body {
 			chatSocket.send(JSON.stringify({
 				"message_id":message_id,
 				'message':message,
-				'file_input':file_input.files[0],
+				"files":"",
 				'username':"{{usr.user.username}}",
 				'receiver':"{{usr2.user.id}}",
 				"room_id":"{{usr.user.id}}_{{usr2.user.id}}"
@@ -1566,22 +1688,6 @@ body {
         form.reset();
 		message_id = ""
 
-		var formdata = new FormData();
-
-		formdata.append("files", file_input.files[0]);
-		formdata.append("csrfmiddlewaretoken", "{{ csrf_token }}");
-
-		$.ajax({
-			method: "POST",
-			url : "/post_files",
-			processData: false,
-			contentType: false,
-			mimeType: "multipart/form-data",
-			data : formdata,
-			success: function(res) {
-				console.log("Successfull Response..!!!")
-			}
-		});
     })
 
 

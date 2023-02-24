@@ -1,10 +1,11 @@
+from django.http import HttpResponse
 from django.shortcuts import render
 from requests import Response
 from .models import FriendRequest, Message, MessageRoom, Notification, UserProfile
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.views import View
-# Create your views here.
+# from django.views.generic.base import TemplateView
 
 
 class HomePageView(View):
@@ -26,16 +27,32 @@ def LoginPage(request):
 
 def ChatRoom(request,id):
 
-    usr = UserProfile.objects.get(user_id=request.user.id)
-    usr2 = UserProfile.objects.get(id=id)
-    
-    if not MessageRoom.objects.filter(first_user=usr, second_user=usr2).exists() and \
-           not MessageRoom.objects.filter(first_user=usr2, second_user=usr).exists():
-        msg_room = MessageRoom.objects.create(first_user=usr, second_user=usr2)
+    print("GROUP_NAME")
+    print(id)
+    print("GROUP_NAME")
+    usr = UserProfile.objects.filter(user_id=request.user.id).first()
+    # usr2 = UserProfile.objects.get(id=id)
 
-    room_name = GetGroupName(usr,usr2)
-    msg = Message.objects.filter(room=room_name).all()
-    latest_msg = Message.objects.filter(room=room_name).last()
+    m_room = MessageRoom.objects.filter(group_name=id).first()
+
+    if m_room.one_to_one:
+        usr2 = m_room.first_user
+        if m_room.first_user == usr:
+            usr2 = m_room.second_user
+    else:
+        usr2 = m_room
+
+    # if not MessageRoom.objects.filter(Q(first_user=usr,second_user=usr2) | \
+    #     Q(first_user=usr2,second_user=usr)).exists():
+    #     MessageRoom.objects.create(first_user=usr, second_user=usr2)
+
+    # if not MessageRoom.objects.filter(Q(first_user=usr,second_user=usr2) | \
+    #     Q(first_user=usr2,second_user=usr)).exists():
+    #     MessageRoom.objects.create(first_user=usr, second_user=usr2)
+
+    # room_name = MessageRoom.GetGroupName(usr.id,usr2.id)
+    msg = Message.objects.filter(room=m_room).all()
+    # latest_msg = Message.objects.filter(room=room_name).last()
 
     # print("------------------MessageRoom-----------------")
     msgs_room = MessageRoom.objects.filter( Q (first_user=usr)| Q(second_user=usr))
@@ -45,40 +62,27 @@ def ChatRoom(request,id):
         m_arr.append(messag)
     # print("------------------MessageRoom-----------------")
 
-    print(request.user)
-    all_usr = UserProfile.objects.filter(user_id=request.user.id).first()
-    print(all_usr)
+    all_rooms = MessageRoom.objects.filter(Q(first_user=usr)|Q(second_user=usr)).all()
+
     profiles = UserProfile.objects.exclude(user=request.user)
     user_profile = UserProfile.objects.filter(user=request.user).first()
     user_notifications = Notification.objects.filter(to_user=user_profile).all()
     friend_req = FriendRequest.objects.filter(from_user=user_profile).values_list("to_user", flat=True)
     print(user_notifications)
 
-    context = {"msg":msg,"usr":usr,"all_usr":all_usr,"usr2":usr2, "room_name":room_name,"notifications":user_notifications,
+    # No need for  ("msg",)
+
+    context = {"msg":msg,"usr":usr,"all_usr":usr,"usr2":usr2,"room_name":m_room,"notifications":user_notifications,"all_rooms":all_rooms,
              "msgs_room":msgs_room, "msgs":m_arr, "profiles":profiles, "user_profile":user_profile, "friend_req":friend_req}
 
     return render(request,"chatroom_index.html", context=context)
 
+class FileUpload(View):
 
-def GetGroupName(u1, u2):
-
-    m1 = MessageRoom.objects.filter(first_user=u1, second_user=u2).first()
-    m2 = MessageRoom.objects.filter(first_user=u2, second_user=u1).first()
-
-    if m1:
-        print("Room_id Exists 1= " + str(m1))
-        group_name = m1
-    elif m2:
-        print("Room_id Exists 2= " + str(m2))
-        group_name = m2
-
-    return group_name
-
-
-
-def FileUpload(request):
-
-    print(request.FILES)
-    print("AJAX WORKING")
-
-    return Response("Yes File received")
+    def post(self, request):
+        files = request.FILES.get('files')
+        msg_id = request.POST.get('message_id')
+        m = Message.objects.filter(id=msg_id).first()
+        m.file=files
+        m.save()
+        return HttpResponse("File Sucessfully added!")
