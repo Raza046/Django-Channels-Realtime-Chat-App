@@ -1,25 +1,33 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
+
 from asgiref.sync import async_to_sync
-from .models import FriendRequest, Message, MessageRoom, Notification, UserProfile
-from django.contrib.auth.models import User
+from channels.generic.websocket import WebsocketConsumer
 from django.db.models import Q
-# import time
+
+from .models import (FriendRequest, Message, MessageRoom, Notification,
+                     UserProfile)
+
 
 class ChatConsumer(WebsocketConsumer):
 
     def connect(self):
 
-        r_id = self.scope['path'].split('socket-server/room_id=')[1].split("_")
-        print("------REQUEST--------")
-        print(r_id[0])
-        print("------REQUEST--------")
+        r_id = self.scope['path'].split('socket-server/room_id=')[1]
+        # print("------REQUEST--------")
+        # # print(r_id[0])
+        # print(r_id)
+        # print("------REQUEST--------")
 
-        try:
-            group_name = MessageRoom.GetGroupName(r_id[0], r_id[1])
-        except:
-            group_name = MessageRoom.objects.filter(group_name=r_id[0]).first()
-            
+        # try:
+        #     group_name = MessageRoom.GetGroupName(r_id[0], r_id[1])
+        #     print("INTO TRY")
+        # except Exception as E:
+        #     print("INTO EXCEPT")
+        #     print(E)
+        group_name = MessageRoom.objects.filter(group_name=r_id).first()
+
+        print(group_name)
+
         usr_id = self.scope["user"]._wrapped.id
         self.MessageRoomUsers(usr_id, group_name, "Add")
 
@@ -42,7 +50,7 @@ class ChatConsumer(WebsocketConsumer):
                 msg_room.users_active.add(usr)
 
             room_group_name = f"chat_{msg_room.group_name}"
-            m_none = Message.objects.filter(receiver=usr,seen_by_users=None).all()
+            m_none = Message.objects.filter(receiver__in=[usr],seen_by_users=None).all()
             m_none_arr = []
             
             if m_none:
@@ -55,7 +63,8 @@ class ChatConsumer(WebsocketConsumer):
                     "my_user":usr.user.username,
                     "m_none":m_none_arr
                 })
-                msg = Message.objects.filter(receiver=usr,seen_by_users=None).all().update(seen_by_users=usr)
+                #  nEED TO WORK ON THiS
+                # msg = Message.objects.filter(receiver__in=[usr],seen_by_users=None).all().update(seen_by_users=usr)
 
             else:
                 # print(m_none.values("id"))
@@ -82,11 +91,15 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         username = text_data_json['username']
-        room_id = text_data_json['room_id'].split("_")
 
+        # try:
+        #     room_id = text_data_json['room_id'].split("_")
+        # except:
+        room_id = text_data_json['room_id']
+        rooms = MessageRoom.objects.filter(group_name=room_id).first()
         try:
             msg = text_data_json['typing']
-
+            # msg = 'typing'
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
                 {
@@ -101,9 +114,18 @@ class ChatConsumer(WebsocketConsumer):
             msg = text_data_json['message']
             msg_id = text_data_json['message_id']
 
-            if not msg_id:
+            print("-----------------Room_id-----------------")
+            print(room_id)
+            print(receiver)
+            print("-----------------Room_id-----------------")
 
-                msg_created = self.save_messages(username,receiver,room_id,msg)
+            is_group = False
+            if not rooms.one_to_one:
+                is_group=True
+
+            if not msg_id:
+                
+                msg_created = self.save_messages(username,receiver,room_id,msg,is_group)
                 print(msg_created)
                 print(msg)
                 async_to_sync(self.channel_layer.group_send)(
@@ -153,12 +175,16 @@ class ChatConsumer(WebsocketConsumer):
         msg_obj = event['msg_created']
         print(room_id)
 
-        receiver = UserProfile.objects.get(user_id=receiver)
+        if msg_obj.room.one_to_one:
+            receiver = UserProfile.objects.get(user_id=receiver)
+            seen_by_user = "No"
+            if receiver == msg_obj.seen_by_users:
+                seen_by_user = "Yes"
+        else:
+            seen_by_user = "No"
+            receiver = msg_obj.room.second_user
         # msg_room = self.GetGroupName(room_id[0], room_id[1])
 
-        seen_by_user = "No"
-        if receiver == msg_obj.seen_by_users:
-            seen_by_user = "Yes"
 
         self.send(
             text_data=json.dumps({
@@ -186,15 +212,39 @@ class ChatConsumer(WebsocketConsumer):
         )
 
 
-    def save_messages(self, username, receiver, room, msg):
+    def save_messages(self, username, receiver, room, msg, is_group=False):
         sender = UserProfile.objects.filter(user__username=username).first()
-        receiver = UserProfile.objects.filter(user_id=receiver).first()
-        room = MessageRoom.GetGroupName(room[0], room[1])
+        print("-------VALLUE OF GROUP----------")
+        # print(is_group)
 
-        created = Message.objects.create(sender=sender,receiver=receiver,room=room,message=msg)
+        room = MessageRoom.objects.filter(group_name=room).first()
+        created = Message.objects.create(sender=sender,room=room,message=msg)
+
+        if not is_group:
+            print("------ADDING RECEIVERS--------")
+            receiver = UserProfile.objects.filter(user_id=receiver).first()
+            created.receiver.add(receiver)
+        else:
+            print("------ADDING GROUP RECEIVERS--------")
+            created.receiver.add(room.first_user)
+            for room_user in room.second_user.all():
+                print("--------ADDING USERS")
+                print(room_user)
+                created.receiver.add(room_user)
+
+            # created.save()
+
+        #     room = MessageRoom.GetGroupName(room[0], room[1])
+
+        # WORK OVER HERE!
+
+        # Continue from here
+
+        # created.save()
+
         msg_obj = Message.objects.get(id=created.id)
         if receiver in room.users_active.all():
-            msg_obj.seen_by_users = receiver
+            msg_obj.seen_by_users.add(receiver)
             msg_obj.save()
             print("******************Message Seen******************")
         return msg_obj
@@ -205,8 +255,13 @@ class ChatConsumer(WebsocketConsumer):
 
     def disconnect(self, close_code):
         # Called when the socket closes
-        r_id = self.scope['path'].split('socket-server/room_id=')[1].split("_")
-        group_name = MessageRoom.GetGroupName(r_id[0], r_id[1])
+        r_id = self.scope['path'].split('socket-server/room_id=')
+        # group_name = MessageRoom.GetGroupName(r_id[0], r_id[1])
+        print(f"group leaved :#<20")
+        print(r_id)
+        group_name = MessageRoom.objects.filter(group_name=r_id[1]).first()
+        print("group leaved:#<20")
+
         usr_id = self.scope["user"]._wrapped.id
         self.MessageRoomUsers(usr_id, group_name, "Remove")
 
@@ -244,8 +299,13 @@ class UserChatConsumer(WebsocketConsumer):
             if text_data_json['decision'] == "Accepted":
                 to_user.friends.add(from_user)
                 from_user.friends.add(to_user)
-                # FIEDNS ACCEPTED
-                MessageRoom.objects.create(first_user=from_user, second_user=to_user)
+                # FRIENDS REQUEST ACCEPTED
+                print("------------ROOM CREATED------------------")
+                msg_created = MessageRoom.objects.create(first_user=from_user)
+                # print("------------ROOM CREATED------------------")
+                msg_created.second_user.add(to_user)
+                # msg_created.second_user.set([to_user])
+                # msg_created.save()
             
         elif notif_type == "friend_request_send":
             message = text_data_json['message']

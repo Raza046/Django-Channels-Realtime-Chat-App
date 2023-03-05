@@ -323,7 +323,7 @@ body {
 									<div class="contacts">
 										
 										<!-- CREATE GROUPS MODAL BELOW -->
-										
+
 										<button class="btn btn-danger" style="background-color:#dc3545;" data-toggle="modal" data-target="#group_id">Create Group</button>
 
 										<div id="group_id" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -347,11 +347,6 @@ body {
 												</div>
 											</div>
 										</div>
-
-
-										
-
-
 
 
 										<h1>Contacts</h1>
@@ -439,15 +434,17 @@ body {
 									</div> -->
 									<div class="list-group" id="chats" role="tablist">
 
-										{% for u in all_rooms.all %}
-										<a href="{% url 'chatroom' u.group_name %}" class="filterDiscussions all unread single active" id="msg__{{u.user.username}}">
+										{% for u in all_rooms %}
+											<a href="{% url 'chatroom' u.group_name %}" class="filterDiscussions all unread single active" id="msg__{{ u.group_name }}">
+
 											{% if u.one_to_one == False %}
-											<img class="avatar-md" src="/{{u.group.group_image}}" data-toggle="tooltip" data-placement="top" title="{{u.group_name}}" alt="avatar">
+												<img class="avatar-md" src="/{{u.group.group_image}}" data-toggle="tooltip" data-placement="top" title="{{u.group_name}}" alt="avatar">
 											{% elif u.first_user.user == request.user %}
-											<img class="avatar-md" src="/{{u.second_user.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{u.second_user.user.username|capfirst}}" alt="avatar">
-											{% elif u.second_user.user == request.user %}
-											<img class="avatar-md" src="/{{u.first_user.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{u.first_user.user.username|capfirst}}" alt="avatar">
+												<img class="avatar-md" src="/{{ u.second_user.all.first.prof_image }}" data-toggle="tooltip" data-placement="top" title="{{u.second_user.all.first.user.username|capfirst}}" alt="avatar">
+											{% elif u.second_user.all.first.user == request.user %}
+												<img class="avatar-md" src="/{{ u.first_user.prof_image }}" data-toggle="tooltip" data-placement="top" title="{{u.first_user.user.username|capfirst}}" alt="avatar">
 											{% endif %}
+			
 											<div class="status">
 												<i class="material-icons online">fiber_manual_record</i>
 											</div>
@@ -456,13 +453,13 @@ body {
 											</div>
 											<div class="data">
 												{% if u.one_to_one == True %}
-												<h5>{{u.second_user.user.username|capfirst}}</h5>
+												<h5>{{ u.second_user.all.first.user.username|capfirst }}</h5>
 												{% else %}
-												<h5>{{u.group_name|capfirst}}</h5>
+												<h5>{{ u.group_name|capfirst }}</h5>
 												{% endif %}
 												<span>Mon</span>
-												<p id="{{u.second_user.user.username}}_message" style="color:rgb(158, 157, 157);"><b>
-													{{u.LatestMessage.message|truncatechars:25}}
+												<p id="{{u.group_name}}_message" style="color:rgb(158, 157, 157);"><b>
+													{{ u.LatestMessage.message|truncatechars:25 }}
 												</b></p>
 											</div>
 										</a>
@@ -1012,16 +1009,16 @@ body {
 										<div class="col-md-12">
 											<div class="inside">
 												{% if usr2.one_to_one == False %}
-													<a href="#"><img class="avatar-md" src="/{{usr2.group.group_image}}" data-toggle="tooltip" data-placement="top" title="{{usr2.group_name}}" alt="avatar"></a>
+													<a href="#"><img class="avatar-md" src="/{{ usr2.group.group_image }}" data-toggle="tooltip" data-placement="top" title="{{usr2.group_name}}" alt="avatar"></a>
 												{% else %}
-													<a href="#"><img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
+													<a href="#"><img class="avatar-md" src="/{{ usr2.prof_image }}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
 												{% endif %}
 	
 												<div class="status">
 													<i class="material-icons online">fiber_manual_record</i>
 												</div>
 												<div class="data">
-													<h5>{{usr2.user.username|capfirst}}</h5>
+													<h5>{{ usr2.user.username|capfirst }}</h5>
 													<span>Active now</span>
 												</div>
 												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-30">phone_in_talk</i></button>
@@ -1060,7 +1057,7 @@ body {
 												<!-- {{m.sender.username}} -- {{request.user.username}} -->
 												{% if m.sender.user.username != request.user.username %}
 													<div class="message" id="msgs_{{m.id}}">
-														<img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip_{{m.id}}" data-placement="top_{{m.id}}" title="{{m.username|capfirst}}" alt="avatar">
+														<img class="avatar-md" src="/{{m.sender.prof_image}}" data-toggle="tooltip_{{m.id}}" data-placement="top_{{m.id}}" title="{{m.username|capfirst}}" alt="avatar">
 														<div class="text-main">
 															<div class="text-group">
 																<div class="text">
@@ -1373,15 +1370,20 @@ body {
 <script type="text/javascript">
     // let url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"abcd"
 	let url = ""
-	if ("{{usr2.one_to_one}}" == "True"){
-		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{usr.id}}_{{usr2.id}}"
-	}
-	else if ("{{usr2.one_to_one}}" == "False"){
-		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{usr2.group_name}}"
+	console.log("{{ usr2.one_to_one }}")
+
+	if ("{{ usr2.one_to_one }}" == "False"){
+		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{ usr2.group_name }}";
 		console.log("IN else if condition")
-}
+	}
+	else{
+		console.log("--------YES-----ONE TO ONE-----");
+		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{ room_name.group_name }}";
+	}
+
 	console.log("URL IS "+url)
-    let users_chatsocket_url = "ws://" + window.location.host +"/ws/user_chat/room_id="+"{{usr.user.id}}"
+
+	let users_chatsocket_url = "ws://" + window.location.host +"/ws/user_chat/room_id="+"{{ usr.user.id }}"
 	let message_edit = false
 	let message_id = ""
 	let msg_audio = new Audio(window.location.origin + "/static/audio/msg_sound.wav");
@@ -1397,7 +1399,7 @@ body {
 		console.log(decision);
 		
 		UserchatSocket.send(JSON.stringify({
-				'from_user':"{{usr.id}}",
+				'from_user':"{{ usr.id }}",
 				'to_user':user_id,
 				'decision':decision,
 				'notification_id':id,
@@ -1471,8 +1473,8 @@ body {
 		console.log('Data:', data);
 
 		if (data.message.notification_type == "message_notification"){
-			ShiftUp(data.message.my_sender);
-			document.getElementById( data.message.my_sender + "_message").innerHTML = "<b style='color:black'>"+data.message.message+"</b>";
+			ShiftUp(data.message.room);
+			document.getElementById( data.message.room + "_message").innerHTML = "<b style='color:black'>"+data.message.message+"</b>";
 		}
 		else if(data.message.notification_type == "Friend Request"){
 			console.log("Friend Request from " + data.message.from_user);
@@ -1521,10 +1523,9 @@ body {
 	}
 
 
-	function ShiftUp(sender) {
+	function ShiftUp(room) {
 		var row = document.getElementById('chats');
-		var user_div = document.getElementById('msg__'+ sender);
-
+		var user_div = document.getElementById('msg__'+ room);
 		if (row.childNodes[0].nextSibling != user_div){
 			console.log("Now Shift it upwards");
 			row.insertBefore(user_div, row.firstChild);
@@ -1539,7 +1540,7 @@ body {
 		if(data.type == "chat"){
             let msgs = document.getElementById("msg_body")
 
-			if(data.username == "{{request.user.username}}"){
+			if(data.username == "{{ request.user.username }}"){
 
 				let file_input = document.getElementById("files_input")
 				var formdata = new FormData();
@@ -1593,7 +1594,7 @@ body {
 			}
 			else{
 				msgs.innerHTML +=   '<div class="message">'+
-										'<img class="avatar-md" src="/{{usr2.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{m.username|capfirst}}" alt="avatar">'+
+										'<img class="avatar-md" src="/{{ usr2.prof_image }}" data-toggle="tooltip" data-placement="top" title="{{m.username|capfirst}}" alt="avatar">'+
 										'<div class="text-main">'+
 											'<div class="text-group">'+
 												'<div class="text">'+
@@ -1615,7 +1616,7 @@ body {
         }
         else if(data.type == "update_chat"){
 			console.log()
-			if (data.receiver == "{{request.user.id}}"){
+			if (data.receiver == "{{ request.user.id }}"){
 				document.getElementById("msg_" + data.msg_id ).innerHTML = data.message;
 			}
 			else{
@@ -1625,8 +1626,8 @@ body {
 
 		else if(data.type == "typing_status"){
 			
-			if(data.username != "{{request.user.username}}"){
-				console.log("{{request.user.username}} IS TYPING........");
+			if(data.username != "{{ request.user.username }}"){
+				console.log("{{ request.user.username }} IS TYPING........");
 				document.getElementById("typing_div").style.display="block";
 				setTimeout(function(){
 					document.getElementById("typing_div").style.display="none";
@@ -1660,8 +1661,8 @@ body {
 		// if(typing_div == "none"){
 			chatSocket.send(JSON.stringify({
 				'typing':'yes',
-				'username':"{{usr.user.username}}",
-				"room_id":"{{usr.id}}_{{usr2.id}}"
+				'username':"{{ usr.user.username }}",
+				"room_id":"{{ usr.id }}_{{ usr2.id }}"
 			}))
 		// }
     }
@@ -1675,7 +1676,13 @@ body {
 	form.addEventListener('submit', (e)=>{
         e.preventDefault();
 		let message = document.getElementById("message_text").value
-		let file_input = document.getElementById("files_input")
+		// let file_input = document.getElementById("files_input")
+
+		room_id = "{{ room_name.group_name }}"
+
+		if("{{ usr2.one_to_one }}" == "False"){
+			room_id = "{{ usr2.group_name }}"
+		}
 
 			chatSocket.send(JSON.stringify({
 				"message_id":message_id,
@@ -1683,16 +1690,11 @@ body {
 				"files":"",
 				'username':"{{usr.user.username}}",
 				'receiver':"{{usr2.user.id}}",
-				"room_id":"{{usr.user.id}}_{{usr2.user.id}}"
+				"room_id":room_id
 			}))
         form.reset();
 		message_id = ""
-
     })
-
-
-
-
 
 
 window.onclick = function(event) {

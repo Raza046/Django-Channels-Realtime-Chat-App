@@ -1,12 +1,17 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from requests import Response
-from .models import FriendRequest, Message, MessageRoom, Notification, UserProfile
+from itertools import chain
+
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views import View
+
+from .models import (FriendRequest, Message, MessageRoom, Notification,
+                     UserProfile)
+
 # from django.views.generic.base import TemplateView
 
+print("Lets Check this stash")
 
 class HomePageView(View):
 
@@ -24,13 +29,14 @@ def LoginPage(request):
 
     return render(request,"login.html")
 
-
 def ChatRoom(request,id):
+    usr = UserProfile.objects.filter(user_id=request.user.id).first()
 
     print("GROUP_NAME")
     print(id)
+    # UserProfile.objects.filter(user_id=request.user.id).first()
+    print(usr.user.username)
     print("GROUP_NAME")
-    usr = UserProfile.objects.filter(user_id=request.user.id).first()
     # usr2 = UserProfile.objects.get(id=id)
 
     m_room = MessageRoom.objects.filter(group_name=id).first()
@@ -38,23 +44,15 @@ def ChatRoom(request,id):
     if m_room.one_to_one:
         usr2 = m_room.first_user
         if m_room.first_user == usr:
-            usr2 = m_room.second_user
+            usr2 = m_room.second_user.all()[0]
     else:
         usr2 = m_room
 
-    # if not MessageRoom.objects.filter(Q(first_user=usr,second_user=usr2) | \
-    #     Q(first_user=usr2,second_user=usr)).exists():
-    #     MessageRoom.objects.create(first_user=usr, second_user=usr2)
-
-    # if not MessageRoom.objects.filter(Q(first_user=usr,second_user=usr2) | \
-    #     Q(first_user=usr2,second_user=usr)).exists():
-    #     MessageRoom.objects.create(first_user=usr, second_user=usr2)
-
-    # room_name = MessageRoom.GetGroupName(usr.id,usr2.id)
-    msg = Message.objects.filter(room=m_room).all()
-    # latest_msg = Message.objects.filter(room=room_name).last()
+    # print(usr2.prof_image)
 
     # print("------------------MessageRoom-----------------")
+
+    msg = Message.objects.filter(room=m_room).all()
     msgs_room = MessageRoom.objects.filter( Q (first_user=usr)| Q(second_user=usr))
     m_arr = []
     for m in msgs_room:
@@ -62,7 +60,11 @@ def ChatRoom(request,id):
         m_arr.append(messag)
     # print("------------------MessageRoom-----------------")
 
-    all_rooms = MessageRoom.objects.filter(Q(first_user=usr)|Q(second_user=usr)).all()
+    all_room1 = MessageRoom.objects.filter(first_user=usr).all()
+    all_room2 = MessageRoom.objects.filter(second_user__in=[usr]).all()
+
+    all_rooms = list(chain(all_room1 , all_room2))
+    print(all_rooms)
 
     profiles = UserProfile.objects.exclude(user=request.user)
     user_profile = UserProfile.objects.filter(user=request.user).first()
@@ -72,8 +74,8 @@ def ChatRoom(request,id):
 
     # No need for  ("msg",)
 
-    context = {"msg":msg,"usr":usr,"all_usr":usr,"usr2":usr2,"room_name":m_room,"notifications":user_notifications,"all_rooms":all_rooms,
-             "msgs_room":msgs_room, "msgs":m_arr, "profiles":profiles, "user_profile":user_profile, "friend_req":friend_req}
+    context = { "msg":msg,"usr":usr,"all_usr":usr,"usr2":usr2,"room_name":m_room,"notifications":user_notifications,"all_rooms":all_rooms,
+             "msgs_room":msgs_room, "msgs":m_arr, "profiles":profiles, "user_profile":user_profile, "friend_req":friend_req }
 
     return render(request,"chatroom_index.html", context=context)
 

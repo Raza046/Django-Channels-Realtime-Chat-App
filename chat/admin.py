@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Message, MessageRoom, UserProfile, FriendRequest, Notification, MessageGroup
+
+from .models import (FriendRequest, Message, MessageGroup, MessageRoom,
+                     Notification, UserProfile)
+
 # Register your models here.
 
 admin.site.register(Message)
