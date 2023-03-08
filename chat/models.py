@@ -266,7 +266,7 @@ def Create_OnetoOne_GroupName(sender, instance,  action, **kwargs):
 
         g_n = f'{f_user}_{s_user}_{instance.first_user.user.id}_{instance.second_user.all()[0].user.id}'
         MessageRoom.objects.filter(id=instance.id).update(group_name=g_n)
-        print("_____CREATING ONE TO ONE GROUP______")
+        # print("_____CREATING ONE TO ONE GROUP______")
 
 
 class MessageGroup(models.Model):
