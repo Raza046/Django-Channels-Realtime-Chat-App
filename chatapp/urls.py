@@ -20,5 +20,8 @@ from chat import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('chatroom/<str:id>', views.ChatRoom, name="chatroom"),
-    path('home/', views.HomePage, name="home"),
+    path('home/', views.HomePageView.as_view(), name="home"),
+    path('login/', views.LoginPage, name="login"),
+    path('post_files/', views.FileUpload.as_view(), name="post_files"),
+
 ]

@@ -1,32 +1,58 @@
-from django.shortcuts import render
-from .models import Message, MessageRoom
+from itertools import chain
+
 from django.contrib.auth.models import User
 from django.db.models import Q
-# Create your views here.
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views import View
+
+from .models import (FriendRequest, Message, MessageRoom, Notification,
+                     UserProfile)
+
+# from django.views.generic.base import TemplateView
+
+print("Lets Check this stash")
+
+class HomePageView(View):
+
+    Model = User
+    template_name = "index.html"
+
+    def get(self, request, *args, **kwargs):
+        usr = User.objects.get(id=request.user.id)
+        all_usr = User.objects.exclude(id=request.user.id)
+        context = {"usr":usr,"all_usr":all_usr}
+        return render(request,"index.html", context)
 
 
-def HomePage(request):
+def LoginPage(request):
 
-    usr = User.objects.get(id=request.user.id)
-    all_usr = User.objects.exclude(id=request.user.id)
-
-    return render(request,"index.html", context={"usr":usr,"all_usr":all_usr})
-
+    return render(request,"login.html")
 
 def ChatRoom(request,id):
+    usr = UserProfile.objects.filter(user_id=request.user.id).first()
 
-    usr = User.objects.get(id=request.user.id)
-    usr2 = User.objects.get(id=id)
-    
-    if not MessageRoom.objects.filter(first_user=usr, second_user=usr2).exists() and \
-           not MessageRoom.objects.filter(first_user=usr2, second_user=usr).exists():
-        msg_room = MessageRoom.objects.create(first_user=usr, second_user=usr2)
+    print("GROUP_NAME")
+    print(id)
+    # UserProfile.objects.filter(user_id=request.user.id).first()
+    print(usr.user.username)
+    print("GROUP_NAME")
+    # usr2 = UserProfile.objects.get(id=id)
 
-    room_name = GetGroupName(usr,usr2)
-    msg = Message.objects.filter(room=room_name).all()
-    latest_msg = Message.objects.filter(room=room_name).last()
+    m_room = MessageRoom.objects.filter(group_name=id).first()
+
+    if m_room.one_to_one:
+        usr2 = m_room.first_user
+        if m_room.first_user == usr:
+            usr2 = m_room.second_user.all()[0]
+    else:
+        usr2 = m_room
+
+    # print(usr2.prof_image)
 
     # print("------------------MessageRoom-----------------")
+
+    msg = Message.objects.filter(room=m_room).all()
     msgs_room = MessageRoom.objects.filter( Q (first_user=usr)| Q(second_user=usr))
     m_arr = []
     for m in msgs_room:
@@ -34,24 +60,31 @@ def ChatRoom(request,id):
         m_arr.append(messag)
     # print("------------------MessageRoom-----------------")
 
-    print(request.user)
-    all_usr = User.objects.exclude(id=request.user.id)
-    context = {"msg":msg,"usr":usr,"all_usr":all_usr,"usr2":usr2, "room_name":room_name, "msgs_room":msgs_room, "msgs":m_arr}
+    all_room1 = MessageRoom.objects.filter(first_user=usr).all()
+    all_room2 = MessageRoom.objects.filter(second_user__in=[usr]).all()
+
+    all_rooms = list(chain(all_room1 , all_room2))
+    print(all_rooms)
+
+    profiles = UserProfile.objects.exclude(user=request.user)
+    user_profile = UserProfile.objects.filter(user=request.user).first()
+    user_notifications = Notification.objects.filter(to_user=user_profile).all()
+    friend_req = FriendRequest.objects.filter(from_user=user_profile).values_list("to_user", flat=True)
+    print(user_notifications)
+
+    # No need for  ("msg",)
+
+    context = { "msg":msg,"usr":usr,"all_usr":usr,"usr2":usr2,"room_name":m_room,"notifications":user_notifications,"all_rooms":all_rooms,
+             "msgs_room":msgs_room, "msgs":m_arr, "profiles":profiles, "user_profile":user_profile, "friend_req":friend_req }
 
     return render(request,"chatroom_index.html", context=context)
 
+class FileUpload(View):
 
-def GetGroupName(u1, u2):
-
-    m1 = MessageRoom.objects.filter(first_user=u1, second_user=u2).first()
-    m2 = MessageRoom.objects.filter(first_user=u2, second_user=u1).first()
-
-    if m1:
-        print("Room_id Exists 1= " + str(m1))
-        group_name = m1
-    elif m2:
-        print("Room_id Exists 2= " + str(m2))
-        group_name = m2
-
-    return group_name
-
+    def post(self, request):
+        files = request.FILES.get('files')
+        msg_id = request.POST.get('message_id')
+        m = Message.objects.filter(id=msg_id).first()
+        m.file=files
+        m.save()
+        return HttpResponse("File Sucessfully added!")
