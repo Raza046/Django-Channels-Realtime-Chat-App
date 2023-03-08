@@ -2,7 +2,7 @@
     "version": 2,
     "builds": [
       {
-        "src": "chatapp/asgi.py",
+        "src": "chatapp/wsgi.py",
         "use": "@vercel/python",
         "config": { "maxLambdaSize": "15mb", "runtime": "python3.9" }
       },
@@ -17,7 +17,7 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "chatapp/asgi.py"
+        "dest": "chatapp/wsgi.py"
       },
       {
         "src": "/static/(.*)",
