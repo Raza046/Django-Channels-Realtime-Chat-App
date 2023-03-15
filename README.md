@@ -1,5 +1,6 @@
 # Django-Channels-Realtime-Chat-App
-Web based chat app developed in django.
+
+A Web based chat application platform developed in Django (Channels).
 
 Following are the functionalities of this chat app:
 
