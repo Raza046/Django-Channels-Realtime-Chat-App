@@ -3,10 +3,10 @@ from itertools import chain
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views import View
 
-from .models import (FriendRequest, Message, MessageRoom, Notification,
+from .models import (FriendRequest, Message, MessageGroup, MessageRoom, Notification,
                      UserProfile)
 
 # from django.views.generic.base import TemplateView
@@ -21,7 +21,12 @@ class HomePageView(View):
     def get(self, request, *args, **kwargs):
         usr = User.objects.get(id=request.user.id)
         all_usr = User.objects.exclude(id=request.user.id)
-        context = {"usr":usr,"all_usr":all_usr}
+        usr_p = UserProfile.objects.filter(user_id=request.user.id).first()
+        all_room1 = MessageRoom.objects.filter(first_user=usr_p).all()
+        all_room2 = MessageRoom.objects.filter(second_user__in=[usr_p]).all()
+        all_rooms = list(chain(all_room1 , all_room2))
+
+        context = {"usr":usr, "all_usr":all_usr, "user_profile":usr_p, "all_rooms":all_rooms}
         return render(request,"index.html", context)
 
 
@@ -88,3 +93,40 @@ class FileUpload(View):
         m.file=files
         m.save()
         return HttpResponse("File Sucessfully added!")
+
+
+# GROUPS VIEWS BELLOW
+
+def CreateGroup(request):
+
+    g_name = request.POST.get("group_name_form")
+    usr = UserProfile.objects.filter(user=request.user).first()
+    print(g_name)
+    group, Created = MessageGroup.objects.get_or_create(group_admin=usr)
+    print(group)
+    room = MessageRoom.objects.create(
+        group_name=g_name,first_user=usr,one_to_one=False,group=group
+        )
+    return redirect("/home")
+
+def AddToGroup(request, id):
+
+    g_name = request.POST.get("user_add_group")
+    friend  = User.objects.filter(username=g_name).first()
+    usr = UserProfile.objects.filter(user=friend).first()
+    print(g_name)
+    group, Created = MessageGroup.objects.get_or_create(group_admin=usr)
+    print(group)
+    room = MessageRoom.objects.filter(id=id).first()
+    room.second_user.add(usr)
+    return redirect("/home")
+
+def RemoveFromGroup(request, id):
+
+    usr = UserProfile.objects.filter(user_id=id).first()
+    cur_usr = UserProfile.objects.filter(user=request.user).first()
+
+    cur_usr.friends.remove(usr)
+    usr.friends.remove(cur_usr)
+
+    return redirect("/home")

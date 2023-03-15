@@ -220,8 +220,8 @@ class MessageRoom(models.Model):
     )
     users_active = models.ManyToManyField(UserProfile, blank=True)
     one_to_one = models.BooleanField(default=True)
-    group = models.OneToOneField(
-        'MessageGroup', on_delete=models.CASCADE, 
+    group = models.ForeignKey(
+        'MessageGroup', on_delete=models.CASCADE,
         related_name='message_groups', null=True, blank=True
     )
 
@@ -237,11 +237,11 @@ class MessageRoom(models.Model):
         latest_msg = Message.objects.filter(room_id=self.id).last()
         return latest_msg
 
-    @staticmethod
-    def GetGroupName(id1, id2):
-        msg_room = MessageRoom.objects.filter(Q(first_user_id=id1, second_user__in=id2)
-                    | Q(first_user_id=id2, second_user__in=id1)).first()
-        return msg_room
+    # @staticmethod
+    # def GetGroupName(id1, id2):
+    #     msg_room = MessageRoom.objects.filter(Q(first_user_id=id1, second_user__in=id2)
+    #                 | Q(first_user_id=id2, second_user__in=id1)).first()
+    #     return msg_room
 
 
 @receiver(post_save, sender=MessageRoom)
