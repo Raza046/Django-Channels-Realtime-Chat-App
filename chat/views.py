@@ -1,10 +1,12 @@
 from itertools import chain
 
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.views import View
+
 
 from .models import (FriendRequest, Message, MessageGroup, MessageRoom, Notification,
                      UserProfile)
@@ -30,20 +32,32 @@ class HomePageView(View):
         return render(request,"index.html", context)
 
 
-def LoginPage(request):
+class LoginView(View):
 
-    return render(request,"login.html")
+    Model = User
+    template_name = "index.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request,"login.html")
+    def post(self,request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(username= username, password=password)
+
+        if user is not None:
+            login(request ,user)
+            return redirect('/home')
+        else:
+            return redirect('/login')
+
+def Logout(request):
+
+    logout(request)
+    return redirect("/login")
+
 
 def ChatRoom(request,id):
     usr = UserProfile.objects.filter(user_id=request.user.id).first()
-
-    print("GROUP_NAME")
-    print(id)
-    # UserProfile.objects.filter(user_id=request.user.id).first()
-    print(usr.user.username)
-    print("GROUP_NAME")
-    # usr2 = UserProfile.objects.get(id=id)
-
     m_room = MessageRoom.objects.filter(group_name=id).first()
 
     if m_room.one_to_one:
@@ -130,3 +144,4 @@ def RemoveFromGroup(request, id):
     usr.friends.remove(cur_usr)
 
     return redirect("/home")
+

@@ -306,8 +306,9 @@ footer a {
             </form>
         </div>
         <div class="form-container sign-in-container" style="font-family: bold;color: #333;">
-            <form action="/home">
-                <img src="{% static 'dist/img/chat_icon.gif' %}" style="height:200px;margin-top:-70px;" alt="">
+            <form action="/login/" method="post">
+				{% csrf_token %}
+				<img src="{% static 'dist/img/chat_icon.gif' %}" style="height:200px;margin-top:-70px;" alt="">
                 <h1>Sign In</h1><br>
                 <!-- <div class="social-container">
                     <a href="#" class="social"><i class="fab fa-facebook-f"></i></a>
@@ -315,8 +316,8 @@ footer a {
                     <a href="#" class="social"><i class="fab fa-linkedin-in"></i></a>
                 </div> -->
                 <!-- <span>or use your account</span> -->
-                <input type="text" placeholder="Username" />
-                <input type="password" placeholder="Password" />
+                <input type="text" placeholder="Username" name="username" />
+                <input type="password" placeholder="Password" name="password" />
                 <a href="#">Forgot your password?</a>
                 <button>Sign In</button>
             </form>
