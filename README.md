@@ -2,6 +2,8 @@
 
 A Web based chat application platform developed using Django (Channels).
 
+Video Link: https://www.youtube.com/watch?v=lJeiyIVrAnc
+
 Following are the functionalities of this chat app:
 
 - Sign up/ Login
