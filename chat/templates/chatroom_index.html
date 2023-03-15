@@ -335,10 +335,14 @@ body {
 													</div>
 													<div class="content">
 															<div class="form-group">
-																<center>
-																	<img class="avatar-lg" src="https://cdn-icons-png.flaticon.com/128/1357/1357616.png" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
-																	<br><h5 style="color:rgb(20, 20, 20)"><b>{{notification.from_user.user.username|capfirst}}</b></h5>
-																</center>
+																<form action="/create_group/" method="post">
+																	{% csrf_token %}
+																	<center>
+																		<img class="avatar-lg" src="https://cdn-icons-png.flaticon.com/128/1357/1357616.png" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																		<input class="form-control" type="text" name="group_name_form" required>
+																	</center>
+																	<button type="submit" class="btn btn-primary">Create</button>
+																</form>
 															</div>
 															<div class="form-group">
 																<h5 id="{{notification.id}}__msg"><b>{{notification.message|capfirst}}</b></h5>
@@ -448,15 +452,18 @@ body {
 											<div class="status">
 												<i class="material-icons online">fiber_manual_record</i>
 											</div>
-											<div class="new bg-red">
+											<!-- <div class="new bg-red">
 												<span>+7</span>
-											</div>
+											</div> -->
 											<div class="data">
-												{% if u.one_to_one == True %}
-												<h5>{{ u.second_user.all.first.user.username|capfirst }}</h5>
+												{% if u.one_to_one == True and u.first_user.user == request.user %}
+													<h5>{{ u.second_user.all.first.user.username|capfirst }}</h5>
+												{% elif u.one_to_one == True and u.second_user.all.first.user == request.user %}
+													<h5>{{ u.first_user.user.username }}</h5>
 												{% else %}
-												<h5>{{ u.group_name|capfirst }}</h5>
+													<h5>{{ u.group_name|capfirst }}</h5>
 												{% endif %}
+												
 												<span>Mon</span>
 												<p id="{{u.group_name}}_message" style="color:rgb(158, 157, 157);"><b>
 													{{ u.LatestMessage.message|truncatechars:25 }}
@@ -591,7 +598,7 @@ body {
 									<div class="settings">
 										<div class="profile">
 											<img class="avatar-xl" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" alt="avatar">
-											<h1><a href="#">Michael Knudsen</a></h1>
+											<h1><a href="#">{{ request.user.username|capfirst }}</a></h1>
 											<span>Helena, Montana</span>
 											<div class="stats">
 												<div class="item">
@@ -599,7 +606,7 @@ body {
 													<h3>Fellas</h3>
 												</div>
 												<div class="item">
-													<h2>305</h2>
+													<h2>0</h2>
 													<h3>Chats</h3>
 												</div>
 												<div class="item">
@@ -1010,22 +1017,69 @@ body {
 											<div class="inside">
 												{% if usr2.one_to_one == False %}
 													<a href="#"><img class="avatar-md" src="/{{ usr2.group.group_image }}" data-toggle="tooltip" data-placement="top" title="{{usr2.group_name}}" alt="avatar"></a>
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="data">
+														<h5>{{ usr2.group_name|capfirst }}</h5>
+														<span>Active now</span>
+													</div>
 												{% else %}
 													<a href="#"><img class="avatar-md" src="/{{ usr2.prof_image }}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="data">
+														<h5>{{ usr2.user.username|capfirst }}</h5>
+														<span>Active now</span>
+													</div>
 												{% endif %}
 	
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>{{ usr2.user.username|capfirst }}</h5>
-													<span>Active now</span>
-												</div>
 												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-30">phone_in_talk</i></button>
 												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-36">videocam</i></button>
 												<button class="btn d-md-block d-none"><i class="material-icons md-30">info</i></button>
+
+
+
 												<div class="dropdown">
-													<button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
+
+
+													<button class="btn" data-toggle="modal" data-target="#group_settings" tabindex="-1" role="dialog" aria-hidden="true"><i class="material-icons md-30">more_vert</i></button>
+
+													<!-- <button class="btn btn-danger" style="background-color:#dc3545;" data-toggle="modal" data-target="#group_settings">Create Group</button> -->
+
+													<div id="group_settings" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+														<div class="modal-dialog modal-dialog-centered" role="document">
+															<div class="requests">
+																<div class="title">
+																	<h1>Settings</h1>
+																	<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+																</div>
+																<div class="form-group">
+																	{% if usr2.one_to_one == False %}
+																		<form action="{% url 'add_to_group' usr2.id %}" method="post">
+																			{% csrf_token %}
+																			<label for="">Add friends</label>
+																			<center>
+																				<input class="form-control" type="text" value="Enter username here.." name="user_add_group" required>
+																				<button type="submit" class="btn btn-primary">Add</button>
+																			</center>
+																		</form>
+																	{% else %}
+																		<form action="{% url 'remove_from_group' usr2.user.id %}" method="post">
+																			{% csrf_token %}
+																			<h4>Unfriend</h4>
+																			<center>
+																				<h5>Are you sure you want to unfriend ?</h5>
+																				<button type="submit" class="btn btn-danger">Unfriend</button>
+																			</center>
+																		</form>
+																	{% endif %}
+																</div>
+															</div>
+														</div>
+													</div>
+			
 													<div class="dropdown-menu dropdown-menu-right">
 														<button class="dropdown-item connect" name="1"><i class="material-icons">phone_in_talk</i>Voice Call</button>
 														<button class="dropdown-item connect" name="1"><i class="material-icons">videocam</i>Video Call</button>
@@ -1039,6 +1093,7 @@ body {
 										</div>
 									</div>
 								</div>
+								
 								<div class="content" id="content">
 									<div class="container">
 										<div class="col-md-12" id="msg_body">
@@ -1151,15 +1206,17 @@ body {
 								<div class="container">
 									<div class="col-md-12">
 										<div class="bottom">
-											<form id="message_form" class="position-relative w-100">
-												<textarea id="message_text" oninput="Typing()" required class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>
-												<button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>
-												<button type="submit" class="btn send"><i class="material-icons">send</i></button>
-											</form>
+											{% if usr2 in usr.friends.all %}
+												<form id="message_form" class="position-relative w-100">
+													<textarea id="message_text" oninput="Typing()" required class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>
+													<button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>
+													<button type="submit" class="btn send"><i class="material-icons">send</i></button>
+												</form>
 											<label>
 												<input id="files_input" type="file">
 												<span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
 											</label> 
+											{% endif %}
 										</div>
 									</div>
 								</div>
@@ -1378,7 +1435,9 @@ body {
 	}
 	else{
 		console.log("--------YES-----ONE TO ONE-----");
-		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+"{{ room_name.group_name }}";
+		group_n = "{{ room_name.group_name }}"
+		group_n = group_n.replace(" ","%20");
+		url = "ws://" + window.location.host +"/ws/socket-server/room_id="+group_n;
 	}
 
 	console.log("URL IS "+url)

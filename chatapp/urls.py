@@ -23,5 +23,9 @@ urlpatterns = [
     path('home/', views.HomePageView.as_view(), name="home"),
     path('login/', views.LoginPage, name="login"),
     path('post_files/', views.FileUpload.as_view(), name="post_files"),
+    path('create_group/', views.CreateGroup, name="create_group"),
+    path('add_to_group/<str:id>', views.AddToGroup, name="add_to_group"),
+    path('remove_from_group/<str:id>', views.RemoveFromGroup, name="remove_from_group"),
+
 
 ]

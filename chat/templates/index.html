@@ -15,6 +15,272 @@
 		<!-- Favicon -->
 		<link href="{% static 'dist/img/favicon.png' %}" type="image/png" rel="icon">
 	</head>
+
+<style>
+
+
+.dropbtn {
+  /* background-color: #3498DB; */
+  color: rgb(88, 88, 88);
+  /* padding: 16px; */
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* .dropdown a:hover {background-color: #ddd;} */
+
+.show {display: block;}
+
+
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: #e9eaed;
+  font-family: arial, sans-serif;
+}
+
+.field-reactions:checked:focus ~ .text-desc, .field-reactions, [class*=reaction-], .text-desc {
+  clip: rect(1px, 1px, 1px, 1px);
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.field-reactions:checked ~ [class*=reaction-], .box:hover [class*=reaction-], .field-reactions:focus ~ .text-desc {
+  clip: auto;
+  overflow: visible;
+  opacity: 1;
+}
+
+.main-title {
+  background: #3a5795;
+  padding: 10px;
+  color: #fff;
+  text-align: center;
+  font-size: 16px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.text-desc {
+  font-weight: normal;
+  text-align: center;
+  transform: translateY(-50px);
+  white-space: nowrap;
+  font-size: 13px;
+  width: 100%;
+}
+
+[class*=reaction-] {
+  border: none;
+  background-image: url(http://deividmarques.github.io/facebook-reactions-css/assets/images/facebook-reactions.png);
+  background-color: transparent;
+  display: block;
+  cursor: pointer;
+  height: 48px;
+  position: absolute;
+  width: 48px;
+  z-index: 11;
+  top: -28;
+  transform-origin: 50% 100%;
+  transform: scale(0.1);
+  transition: all 0.3s;
+  outline: none;
+  will-change: transform;
+  opacity: 0;
+}
+
+.box {
+  position: absolute;
+  left: calc(50% - 150px);
+  top: calc(50% - 50px);
+  width: 300px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9;
+  visibility: hidden;
+}
+
+.field-reactions:focus ~ .label-reactions {
+  border-color: rgba(88, 144, 255, 0.3);
+}
+.field-reactions:checked:focus ~ .label-reactions {
+  border-color: transparent;
+}
+.label-reactions {
+  background: url(https://cdn4.iconfinder.com/data/icons/facebook-likes/100/1.png) no-repeat 0 0;
+  border: 2px dotted transparent;
+  display: block;
+  height: 100px;
+  margin: 0 auto;
+  width: 100px;
+  color: transparent;
+  cursor: pointer;
+}
+
+.toolbox {
+  background: #fff;
+  height: 52px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 2px rgba(0, 0, 0, 0.15);
+  width: 300px;
+  border-radius: 40px;
+  top: -30px;
+  left: 0;
+  position: absolute;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.legend-reaction {
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #fff;
+  display: inline-block;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  font-weight: bold;
+  line-height: 20px;
+  max-width: 100%;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0 6px;
+  transition: opacity 50ms ease;
+  left: 50%;
+  position: absolute;
+  text-align: center;
+  top: -28px;
+  transform: translateX(-50%);
+}
+
+.box:hover [class*=reaction-] {
+  transform: scale(0.8) translateY(-40px);
+}
+.box:hover [class*=reaction-]:hover, .box:hover [class*=reaction-]:focus {
+  transition: all 0.2s ease-in;
+  transform: scale(1) translateY(-35px);
+}
+.box:hover [class*=reaction-]:hover .legend-reaction, .box:hover [class*=reaction-]:focus .legend-reaction {
+  opacity: 1;
+}
+.box:hover .toolbox {
+  opacity: 1;
+}
+.box:hover .toolbox {
+  visibility: visible;
+}
+.box:hover .reaction-love {
+  transition-delay: 0.06s;
+}
+.box:hover .reaction-haha {
+  transition-delay: 0.09s;
+}
+.box:hover .reaction-wow {
+  transition-delay: 0.12s;
+}
+.box:hover .reaction-sad {
+  transition-delay: 0.15s;
+}
+.box:hover .reaction-angry {
+  transition-delay: 0.18s;
+}
+
+.field-reactions:checked ~ [class*=reaction-] {
+  transform: scale(0.8) translateY(-40px);
+}
+.field-reactions:checked ~ [class*=reaction-]:hover, .field-reactions:checked ~ [class*=reaction-]:focus {
+  transition: all 0.2s ease-in;
+  transform: scale(1) translateY(-35px);
+}
+.field-reactions:checked ~ [class*=reaction-]:hover .legend-reaction, .field-reactions:checked ~ [class*=reaction-]:focus .legend-reaction {
+  opacity: 1;
+}
+.field-reactions:checked ~ .toolbox {
+  opacity: 1;
+}
+.field-reactions:checked ~ .toolbox,
+.field-reactions:checked ~ .overlay {
+  visibility: visible;
+}
+.field-reactions:checked ~ .reaction-love {
+  transition-delay: 0.03s;
+}
+.field-reactions:checked ~ .reaction-haha {
+  transition-delay: 0.09s;
+}
+.field-reactions:checked ~ .reaction-wow {
+  transition-delay: 0.12s;
+}
+.field-reactions:checked ~ .reaction-sad {
+  transition-delay: 0.15s;
+}
+.field-reactions:checked ~ .reaction-angry {
+  transition-delay: 0.18s;
+}
+
+.reaction-like {
+  left: 0;
+  background-position: 0 -144px;
+}
+
+.reaction-love {
+  background-position: -48px 0;
+  left: 50px;
+}
+
+.reaction-haha {
+  background-position: -96px 0;
+  left: 100px;
+}
+
+.reaction-wow {
+  background-position: -144px 0;
+  left: 150px;
+}
+
+.reaction-sad {
+  background-position: -192px 0;
+  left: 200px;
+}
+
+.reaction-angry {
+  background-position: -240px 0;
+  left: 250px;
+}
+
+	
+</style>
+
+
 	<body>
 		<main>
 			<div class="layout">
@@ -23,13 +289,13 @@
 					<div class="container">
 						<div class="inside">
 							<div class="nav nav-tab menu">
-								<button class="btn"><img class="avatar-xl" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" alt="avatar"></button>
+								<button class="btn"><img class="avatar-xl" src="/{{user_profile.prof_image}}" alt="avatar"></button>
 								<a href="#members" data-toggle="tab"><i class="material-icons">account_circle</i></a>
 								<a href="#discussions" data-toggle="tab" class="active"><i class="material-icons active">chat_bubble_outline</i></a>
 								<a href="#notifications" data-toggle="tab" class="f-grow1"><i class="material-icons">notifications_none</i></a>
 								<button class="btn mode"><i class="material-icons">brightness_2</i></button>
 								<a href="#settings" data-toggle="tab"><i class="material-icons">settings</i></a>
-								<button class="btn power" onclick="visitPage();"><i class="material-icons">power_settings_new</i></button>
+								<a href="/login"><button class="btn power"><i class="material-icons">power_settings_new</i></button></a>
 							</div>
 						</div>
 					</div>
@@ -53,127 +319,90 @@
 										<button class="btn filterMembersBtn active show" data-toggle="list" data-filter="all">All</button>
 										<button class="btn filterMembersBtn" data-toggle="list" data-filter="online">Online</button>
 										<button class="btn filterMembersBtn" data-toggle="list" data-filter="offline">Offline</button>
-									</div>						
+									</div>
 									<div class="contacts">
+										
+										<!-- CREATE GROUPS MODAL BELOW -->
+
+										<button class="btn btn-danger" style="background-color:#dc3545;" data-toggle="modal" data-target="#group_id">Create Group</button>
+
+										<div id="group_id" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+											<div class="modal-dialog modal-dialog-centered" role="document">
+												<div class="requests">
+													<div class="title">
+														<h1>Create Groups</h1>
+														<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+													</div>
+													<div class="content">
+															<div class="form-group">
+																<form action="/create_group/" method="post">
+																	{% csrf_token %}
+																	<center>
+																		<img class="avatar-lg" src="https://cdn-icons-png.flaticon.com/128/1357/1357616.png" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																		<input class="form-control" type="text" name="group_name_form" required>
+																	</center>
+																	<button type="submit" class="btn btn-primary">Create</button>
+																</form>
+															</div>
+															<div class="form-group">
+																<h5 id="{{notification.id}}__msg"><b>{{notification.message|capfirst}}</b></h5>
+															</div>
+													</div>
+												</div>
+											</div>
+										</div>
+
+
 										<h1>Contacts</h1>
 										<div class="list-group" id="contacts" role="tablist">
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
+											{% for users in profiles.all %}
+
+												<a href="#" class="filterMembers all online contact" data-toggle="list">
+													<img class="avatar-md" src="/{{users.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{users.user.username}}" alt="avatar">
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="data">
+														<h5>{{users.user.username}}</h5>
+														<p>{{users.city}}, {{users.country}}</p>
+													</div>
+													{% if users not in user_profile.friends.all %}
+													<div class="">
+														<i data-toggle="modal" data-target="#FriendRequestModal_{{users.id}}" class="material-icons">person_add</i>
+													</div>
+													{% endif %}
+												</a>
+												
+												<div id="FriendRequestModal_{{users.id}}" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+													<div class="modal-dialog modal-dialog-centered" role="document">
+														<div class="requests">
+															<div class="title">
+																<!-- <h1>Add your friends</h1> -->
+																<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+															</div>
+															<div class="content">
+																<form id="freq_form_{{users.id}}" onsubmit="event.preventDefault(); friend_form('freq_form_{{users.id}}','{{users.id}}');">
+																	<div class="form-group">
+																		<center>
+																			<img class="avatar-lg" src="/{{users.prof_image}}" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																			<br><h5 style="color:rgb(20, 20, 20)"><b>{{users.user.username|capfirst}}</b></h5>
+																		</center>
+																	</div>
+																	<div class="form-group">
+																		<label for="welcome">Message:</label>
+																		<textarea id="freq_msg_{{users.id}}" style="color:rgb(29, 28, 28)!important;" class="text-control" placeholder="Send message...">Hi {{users.user.username|capfirst}}, I'd like to add you as a friend.</textarea>
+																	</div>
+																	{% if users.id in friend_req %}
+																		<button type="submit" style="background-color:#14a44d; opacity:0.5;" disabled class="btn button w-100">Request Already Sent</button>
+																	{% else %}
+																		<button type="submit" class="btn button w-100">Send Friend Request</button>
+																	{% endif %}
+																</form>
+															</div>
+														</div>
+													</div>
 												</div>
-												<div class="data">
-													<h5>Janette Dalton</h5>
-													<p>Sofia, Bulgaria</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Michael Knudsen</h5>
-													<p>Washington, USA</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Lean Avent</h5>
-													<p>Shanghai, China</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Mariette Toles</h5>
-													<p>Helena, Montana</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all online contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Harmony Otero</h5>
-													<p>Indore, India</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Keith Morris</h5>
-													<p>Chisinau, Moldova</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Louis Martinez</h5>
-													<p>Vienna, Austria</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Ryan Foster</h5>
-													<p>Oslo, Norway</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
-											<a href="#" class="filterMembers all offline contact" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-4.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Mildred Bennett</h5>
-													<p>London, United Kingdom</p>
-												</div>
-												<div class="person-add">
-													<i class="material-icons">person</i>
-												</div>
-											</a>
+											{% endfor %}
 										</div>
 									</div>
 								</div>
@@ -194,22 +423,72 @@
 									</div>						
 									<div class="discussions">
 										<h1>Discussions</h1>
-										<div class="list-group" id="chats" role="tablist">
-											<a href="#list-chat" class="filterDiscussions all unread single active" id="list-chat-list" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="new bg-yellow">
-													<span>+7</span>
-												</div>
-												<div class="data">
-													<h5>Janette Dalton</h5>
-													<span>Mon</span>
-													<p>A new feature has been updated to your account. Check it out...</p>
-												</div>
-											</a>									
-											<a href="#list-empty" class="filterDiscussions all unread single" id="list-empty-list" data-toggle="list" role="tab">
+									<div class="list-group" id="chats" role="tablist">
+
+										{% for u in all_rooms %}
+											<a href="{% url 'chatroom' u.group_name %}" class="filterDiscussions all unread single active" id="msg__{{ u.group_name }}">
+
+											{% if u.one_to_one == False %}
+												<img class="avatar-md" src="/{{u.group.group_image}}" data-toggle="tooltip" data-placement="top" title="{{u.group_name}}" alt="avatar">
+											{% elif u.first_user.user == request.user %}
+												<img class="avatar-md" src="/{{ u.second_user.all.first.prof_image }}" data-toggle="tooltip" data-placement="top" title="{{u.second_user.all.first.user.username|capfirst}}" alt="avatar">
+											{% elif u.second_user.all.first.user == request.user %}
+												<img class="avatar-md" src="/{{ u.first_user.prof_image }}" data-toggle="tooltip" data-placement="top" title="{{u.first_user.user.username|capfirst}}" alt="avatar">
+											{% endif %}
+			
+											<div class="status">
+												<i class="material-icons online">fiber_manual_record</i>
+											</div>
+											<!-- <div class="new bg-red">
+												<span>+7</span>
+											</div> -->
+											<div class="data">
+												{% if u.one_to_one == True and u.first_user.user == request.user %}
+													<h5>{{ u.second_user.all.first.user.username|capfirst }}</h5>
+												{% elif u.one_to_one == True and u.second_user.all.first.user == request.user %}
+													<h5>{{ u.first_user.user.username }}</h5>
+												{% else %}
+													<h5>{{ u.group_name|capfirst }}</h5>
+												{% endif %}
+												
+												<span>Mon</span>
+												<p id="{{u.group_name}}_message" style="color:rgb(158, 157, 157);"><b>
+													{{ u.LatestMessage.message|truncatechars:25 }}
+												</b></p>
+											</div>
+										</a>
+										{% endfor %}
+
+
+											<!-- {% for u in all_usr.friends.all %}
+
+												{% if u.username == usr2.username %}
+													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single active" id="msg__{{u.user.username}}">
+												{% else %}
+													<a href="{% url 'chatroom' u.id %}" class="filterDiscussions all unread single" id="msg__{{u.user.username}}">
+												{% endif %}
+													<img class="avatar-md" src="/{{u.prof_image}}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="new bg-red">
+														<span>+7</span>
+													</div>
+													<div class="data">
+														<h5>{{u.user.username|capfirst}}</h5>
+														<span>Mon</span>
+														<p id="{{u.user.username}}_message" style="color:rgb(158, 157, 157);"><b>
+															{% for m in msgs %}
+																{% if m.sender == u or m.receiver == u %}
+																	{{m.message|truncatechars:25}}
+																{% endif %}
+															{% endfor %}
+														</b></p>
+													</div>
+												</a>
+											{% endfor %} -->
+
+											<!-- <a href="#list-empty" class="filterDiscussions all unread single" id="list-empty-list" data-toggle="list" role="tab">
 												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
 												<div class="status">
 													<i class="material-icons offline">fiber_manual_record</i>
@@ -222,90 +501,7 @@
 													<span>Sun</span>
 													<p>How can i improve my chances of getting a deposit?</p>
 												</div>
-											</a>									
-											<a href="#list-chat" class="filterDiscussions all read single" id="list-chat-list2" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Lean Avent</h5>
-													<span>Tus</span>
-													<p>Hey Chris, could i ask you to help me out with variation...</p>
-												</div>
-											</a>
-											<a href="#list-empty" class="filterDiscussions all read single" id="list-empty-list2" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Mariette Toles</h5>
-													<span>5 mins</span>
-													<p>By injected humour, or randomised words which...</p>
-												</div>
-											</a>
-											<a href="#list-chat" class="filterDiscussions all read single" id="list-chat-list3" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Harmony" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Harmony Otero</h5>
-													<span>Mon</span>
-													<p>No more running out of the office at 4pm on Fridays!</p>
-												</div>
-											</a>
-											<a href="#list-empty" class="filterDiscussions all read single" id="list-empty-list3" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Keith Morris</h5>
-													<span>Fri</span>
-													<p>All your favourite books at your reach! We are now mobile.</p>
-												</div>
-											</a>
-											<a href="#list-request" class="filterDiscussions all unread single" id="list-request-list" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="new bg-gray">
-													<span>?</span>
-												</div>
-												<div class="data">
-													<h5>Louis Martinez</h5>
-													<span>Feb 10</span>
-													<p>Hi Keith, I'd like to add you as a contact.</p>
-												</div>
-											</a>
-											<a href="#list-empty" class="filterDiscussions all read single" id="list-empty-list4" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Ryan" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5>Ryan Foster</h5>
-													<span>Feb 9</span>
-													<p>Dear Deborah, your Thai massage is today at 5pm.</p>
-												</div>
-											</a>
-											<a href="#list-chat" class="filterDiscussions all unread single" id="list-chat-list5" data-toggle="list" role="tab">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-4.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mildred" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="new bg-green">
-													<span>+9</span>
-												</div>
-												<div class="data">
-													<h5>Mildred Bennett</h5>
-													<span>Thu</span>
-													<p>Unfortunately your session today has been cancelled!</p>
-												</div>
-											</a>
+											</a>									 -->
 										</div>
 									</div>
 								</div>
@@ -326,106 +522,70 @@
 									<div class="notifications">
 										<h1>Notifications</h1>
 										<div class="list-group" id="alerts" role="tablist">
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
+											
+											{% for notification in notifications %}
+												<a href="#" class="filterNotifications all latest notification" data-toggle="list">
+													<img class="avatar-md" src="/{{notification.from_user.prof_image}}" data-toggle="tooltip" data-placement="top" title="{{notification.from_user.user.username|capfirst}}" alt="avatar">
+													<div class="status">
+														<i class="material-icons online">fiber_manual_record</i>
+													</div>
+													<div class="data">
+														<p>{{notification.message|capfirst}}.</p>
+														<span>{{notification.created_at}}</span>
+													</div>
+													<div class="">
+														<button class="btn btn-secondary" style="background-color:#00b797" data-toggle="modal" data-target="#notif_{{notification.id}}" >view</button>
+													</div>
+												</a>
+
+											<div id="notif_{{notification.id}}" class="modal fade forget-modal" tabindex="-1" role="dialog" aria-hidden="true">
+												<div class="modal-dialog modal-dialog-centered" role="document">
+													<div class="requests">
+														<div class="title">
+															<!-- <h1>Add your friends</h1> -->
+															<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
+														</div>
+														<div class="content">
+																<div class="form-group">
+																	<center>
+																		<img class="avatar-lg" src="/{{notification.from_user.prof_image}}" style="height:100px;max-width:100px;margin-top:-50px;" data-toggle="tooltip" data-placement="top" alt="avatar"><br>
+																		<br><h5 style="color:rgb(20, 20, 20)"><b>{{notification.from_user.user.username|capfirst}}</b></h5>
+																	</center>
+																</div>
+																<div class="form-group">
+																	<h5 id="{{notification.id}}__msg"><b>{{notification.message|capfirst}}</b></h5>
+																</div>
+																{% if notification.notification_type == "Friend Request" %}
+																	{% with notif_msg=notification.message %}
+																		{% if "Rejected" not in notif_msg and "Accepted" not in notif_msg %}
+																			<div class="row" id="notifBtn_{{notification.id}}">
+																				<div class="col-md-5">
+																					<button type="submit" onclick="notification_form('{{notification.id}}','{{notification.from_user.id}}','Accepted');" style="background-color:#17cf60;" class="btn button w-100">Accept</button>
+																				</div>
+																				<div class="col-md-5">
+																					<button type="submit" onclick="notification_form('{{notification.id}}','{{notification.from_user.id}}','Rejected');" style="background-color:#ff4848;" class="btn button w-100">Reject</button>
+																				</div>
+																			</div>
+																		{% endif %}
+																	{% endwith %}
+																{% endif %}
+														</div>
+													</div>
 												</div>
-												<div class="data">
-													<p>Janette has accepted your friend request on Swipe.</p>
-													<span>Oct 17, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" data-toggle="tooltip" data-placement="top" title="Michael" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Michael, you have a new friend suggestion today.</p>
-													<span>Jun 21, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Mariette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Mariette have just sent you a new message.</p>
-													<span>Feb 15, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Louis has a birthday today. Wish her all the best.</p>
-													<span>Mar 23, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all latest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Harmony has accepted your friend request on Swipe.</p>
-													<span>Jan 5, 2018</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Keith have just sent you a new message.</p>
-													<span>Dec 22, 2017</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Michael, you have a new friend suggestion today.</p>
-													<span>Nov 29, 2017</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-3.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Ryan have just sent you a new message.</p>
-													<span>Sep 31, 2017</span>
-												</div>
-											</a>
-											<a href="#" class="filterNotifications all oldest notification" data-toggle="list">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-male-4.jpg' %}" data-toggle="tooltip" data-placement="top" title="Janette" alt="avatar">
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<p>Mildred has a birthday today. Wish him all the best.</p>
-													<span>Jul 19, 2017</span>
-												</div>
-											</a>
+											</div>
+
+											{% endfor %}
+
 										</div>
 									</div>
 								</div>
 								<!-- End of Notifications -->
 								<!-- Start of Settings -->
-								<div class="tab-pane fade" id="settings">			
+								<div class="tab-pane fade" id="settings">
 									<div class="settings">
 										<div class="profile">
 											<img class="avatar-xl" src="{% static 'dist/img/avatars/avatar-male-1.jpg' %}" alt="avatar">
-											<h1><a href="#">Michael Knudsen</a></h1>
+											<h1><a href="#">{{ request.user.username|capfirst }}</a></h1>
 											<span>Helena, Montana</span>
 											<div class="stats">
 												<div class="item">
@@ -433,7 +593,7 @@
 													<h3>Fellas</h3>
 												</div>
 												<div class="item">
-													<h2>305</h2>
+													<h2>0</h2>
 													<h3>Chats</h3>
 												</div>
 												<div class="item">
@@ -735,16 +895,6 @@
 														</div>
 														<div class="set">
 															<div class="details">
-																<h5>My Friends Are Nice</h5>
-																<p>If enabled scans direct messages from everyone unless they are listed as your friend.</p>
-															</div>
-															<label class="switch">
-																<input type="checkbox" checked>
-																<span class="slider round"></span>
-															</label>
-														</div>
-														<div class="set">
-															<div class="details">
 																<h5>Everyone can add me</h5>
 																<p>If enabled anyone in or out your friends of friends list can send you a friend request.</p>
 															</div>
@@ -808,36 +958,6 @@
 					</div>
 				</div>
 				<!-- End of Sidebar -->
-				<!-- Start of Add Friends -->
-				<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-hidden="true">
-					<div class="modal-dialog modal-dialog-centered" role="document">
-						<div class="requests">
-							<div class="title">
-								<h1>Add your friends</h1>
-								<button type="button" class="btn" data-dismiss="modal" aria-label="Close"><i class="material-icons">close</i></button>
-							</div>
-							<div class="content">
-								<form>
-									<div class="form-group">
-										<label for="user">Username:</label>
-										<input type="text" class="form-control" id="user" placeholder="Add recipient..." required>
-										<div class="user" id="contact">
-											<img class="avatar-sm" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" alt="avatar">
-											<h5>Keith Morris</h5>
-											<button class="btn"><i class="material-icons">close</i></button>
-										</div>
-									</div>
-									<div class="form-group">
-										<label for="welcome">Message:</label>
-										<textarea class="text-control" id="welcome" placeholder="Send your welcome message...">Hi Keith, I'd like to add you as a contact.</textarea>
-									</div>
-									<button type="submit" class="btn button w-100">Send Friend Request</button>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- End of Add Friends -->
 				<!-- Start of Create Chat -->
 				<div class="modal fade" id="startnewchat" tabindex="-1" role="dialog" aria-hidden="true">
 					<div class="modal-dialog modal-dialog-centered" role="document">
@@ -872,371 +992,7 @@
 					</div>
 				</div>
 				<!-- End of Create Chat -->
-				<div class="main">
-					<div class="tab-content" id="nav-tabContent">
-						<!-- Start of Babble -->
-						<div class="babble tab-pane fade active show" id="list-chat" role="tabpanel" aria-labelledby="list-chat-list">
-							<!-- Start of Chat -->
-							<div class="chat" id="chat1">
-								<div class="top">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="inside">
-												<a href="#"><img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar"></a>
-												<div class="status">
-													<i class="material-icons online">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5><a href="#">Keith Morris</a></h5>
-													<span>Active now</span>
-												</div>
-												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-30">phone_in_talk</i></button>
-												<button class="btn connect d-md-block d-none" name="1"><i class="material-icons md-36">videocam</i></button>
-												<button class="btn d-md-block d-none"><i class="material-icons md-30">info</i></button>
-												<div class="dropdown">
-													<button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
-													<div class="dropdown-menu dropdown-menu-right">
-														<button class="dropdown-item connect" name="1"><i class="material-icons">phone_in_talk</i>Voice Call</button>
-														<button class="dropdown-item connect" name="1"><i class="material-icons">videocam</i>Video Call</button>
-														<hr>
-														<button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>
-														<button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>
-														<button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="content" id="content">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="date">
-												<hr>
-												<span>Yesterday</span>
-												<hr>
-											</div>
-											<div class="message">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="text-main">
-													<div class="text-group">
-														<div class="text">
-															<p>We've got some killer ideas kicking about already.</p>
-														</div>
-													</div>
-													<span>09:46 AM</span>
-												</div>
-											</div>
-											<div class="message me">
-												<div class="text-main">
-													<div class="text-group me">
-														<div class="text me">
-															<p>Can't wait! How are we coming along with the client?</p>
-														</div>
-													</div>
-													<span>11:32 AM</span>
-												</div>
-											</div>
-											<div class="message">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="text-main">
-													<div class="text-group">
-														<div class="text">
-															<p>Coming along nicely, we've got a draft for the client quarries completed.</p>
-														</div>
-													</div>
-													<span>02:56 PM</span>
-												</div>
-											</div>
-											<div class="message me">
-												<div class="text-main">
-													<div class="text-group me">
-														<div class="text me">
-															<p>Roger that boss!</p>
-														</div>
-													</div>
-													<div class="text-group me">
-														<div class="text me">
-															<p>I have already started gathering some stuff for the mood boards, excited to start!</p>
-														</div>
-													</div>
-													<span>10:21 PM</span>
-												</div>
-											</div>
-											<div class="message">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="text-main">
-													<div class="text-group">
-														<div class="text">
-															<p>Great start guys, I've added some notes to the task. We may need to make some adjustments to the last couple of items - but no biggie!</p>
-														</div>
-													</div>
-													<span>11:07 PM</span>
-												</div>
-											</div>
-											<div class="date">
-												<hr>
-												<span>Today</span>
-												<hr>
-											</div>
-											<div class="message me">
-												<div class="text-main">
-													<div class="text-group me">
-														<div class="text me">
-															<p>Well done all. See you all at 2 for the kick-off meeting.</p>
-														</div>
-													</div>
-													<span>10:21 PM</span>
-												</div>
-											</div>
-											<div class="message">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="text-main">
-													<div class="text-group">
-														<div class="text">
-															<div class="attachment">
-																<button class="btn attach"><i class="material-icons md-18">insert_drive_file</i></button>
-																<div class="file">
-																	<h5><a href="#">Tenacy Agreement.pdf</a></h5>
-																	<span>24kb Document</span>
-																</div>
-															</div>
-														</div>
-													</div>
-													<span>11:07 PM</span>
-												</div>
-											</div>
-											<div class="message me">
-												<div class="text-main">
-													<div class="text-group me">
-														<div class="text me">
-															<p>Hope you're all ready to tackle this great project. Let's smash some Brand Concept & Design!</p>
-														</div>
-													</div>
-													<span><i class="material-icons">check</i>10:21 PM</span>
-												</div>
-											</div>
-											<div class="message">
-												<img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" data-toggle="tooltip" data-placement="top" title="Keith" alt="avatar">
-												<div class="text-main">
-													<div class="text-group">
-														<div class="text typing">
-															<div class="wave">
-																<span class="dot"></span>
-																<span class="dot"></span>
-																<span class="dot"></span>
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="container">
-									<div class="col-md-12">
-										<div class="bottom">
-											<form class="position-relative w-100">
-												<textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>
-												<button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>
-												<button type="submit" class="btn send"><i class="material-icons">send</i></button>
-											</form>
-											<label>
-												<input type="file">
-												<span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
-											</label> 
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- End of Chat -->
-							<!-- Start of Call -->
-							<div class="call" id="call1">
-								<div class="content">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="inside">
-												<div class="panel">
-													<div class="participant">
-														<img class="avatar-xxl" src="{% static 'dist/img/avatars/avatar-female-5.jpg' %}" alt="avatar">
-														<span>Connecting</span>
-													</div>							
-													<div class="options">
-														<button class="btn option"><i class="material-icons md-30">mic</i></button>
-														<button class="btn option"><i class="material-icons md-30">videocam</i></button>
-														<button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>
-														<button class="btn option"><i class="material-icons md-30">person_add</i></button>
-														<button class="btn option"><i class="material-icons md-30">volume_up</i></button>
-													</div>
-													<button class="btn back" name="1"><i class="material-icons md-24">chat</i></button>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- End of Call -->
-						</div>
-						<!-- End of Babble -->
-						<!-- Start of Babble -->
-						<div class="babble tab-pane fade" id="list-empty" role="tabpanel" aria-labelledby="list-empty-list">
-							<!-- Start of Chat -->
-							<div class="chat" id="chat2">
-								<div class="top">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="inside">
-												<a href="#"><img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" data-toggle="tooltip" data-placement="top" title="Lean" alt="avatar"></a>
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5><a href="#">Lean Avent</a></h5>
-													<span>Inactive</span>
-												</div>
-												<button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-30">phone_in_talk</i></button>
-												<button class="btn connect d-md-block d-none" name="2"><i class="material-icons md-36">videocam</i></button>
-												<button class="btn d-md-block d-none"><i class="material-icons md-30">info</i></button>
-												<div class="dropdown">
-													<button class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="material-icons md-30">more_vert</i></button>
-													<div class="dropdown-menu dropdown-menu-right">
-														<button class="dropdown-item connect" name="2"><i class="material-icons">phone_in_talk</i>Voice Call</button>
-														<button class="dropdown-item connect" name="2"><i class="material-icons">videocam</i>Video Call</button>
-														<hr>
-														<button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>
-														<button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>
-														<button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="content empty">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="no-messages">
-												<i class="material-icons md-48">forum</i>
-												<p>Seems people are shy to start the chat. Break the ice send the first message.</p>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="container">
-									<div class="col-md-12">
-										<div class="bottom">
-											<form class="position-relative w-100">
-												<textarea class="form-control" placeholder="Start typing for reply..." rows="1"></textarea>
-												<button class="btn emoticons"><i class="material-icons">insert_emoticon</i></button>
-												<button type="submit" class="btn send"><i class="material-icons">send</i></button>
-											</form>
-											<label>
-												<input type="file">
-												<span class="btn attach d-sm-block d-none"><i class="material-icons">attach_file</i></span>
-											</label> 
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- End of Chat -->
-							<!-- Start of Call -->
-							<div class="call" id="call2">
-								<div class="content">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="inside">
-												<div class="panel">
-													<div class="participant">
-														<img class="avatar-xxl" src="{% static 'dist/img/avatars/avatar-female-2.jpg' %}" alt="avatar">
-														<span>Connecting</span>
-													</div>							
-													<div class="options">
-														<button class="btn option"><i class="material-icons md-30">mic</i></button>
-														<button class="btn option"><i class="material-icons md-30">videocam</i></button>
-														<button class="btn option call-end"><i class="material-icons md-30">call_end</i></button>
-														<button class="btn option"><i class="material-icons md-30">person_add</i></button>
-														<button class="btn option"><i class="material-icons md-30">volume_up</i></button>
-													</div>
-													<button class="btn back" name="2"><i class="material-icons md-24">chat</i></button>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- End of Call -->
-						</div>
-						<!-- End of Babble -->
-						<!-- Start of Babble -->
-						<div class="babble tab-pane fade" id="list-request" role="tabpanel" aria-labelledby="list-request-list">
-							<!-- Start of Chat -->
-							<div class="chat" id="chat3">
-								<div class="top">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="inside">
-												<a href="#"><img class="avatar-md" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>
-												<div class="status">
-													<i class="material-icons offline">fiber_manual_record</i>
-												</div>
-												<div class="data">
-													<h5><a href="#">Louis Martinez</a></h5>
-													<span>Inactive</span>
-												</div>
-												<button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-30">phone_in_talk</i></button>
-												<button class="btn disabled d-md-block d-none" disabled><i class="material-icons md-36">videocam</i></button>
-												<button class="btn d-md-block disabled d-none" disabled><i class="material-icons md-30">info</i></button>
-												<div class="dropdown">
-													<button class="btn disabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled><i class="material-icons md-30">more_vert</i></button>
-													<div class="dropdown-menu dropdown-menu-right">
-														<button class="dropdown-item"><i class="material-icons">phone_in_talk</i>Voice Call</button>
-														<button class="dropdown-item"><i class="material-icons">videocam</i>Video Call</button>
-														<hr>
-														<button class="dropdown-item"><i class="material-icons">clear</i>Clear History</button>
-														<button class="dropdown-item"><i class="material-icons">block</i>Block Contact</button>
-														<button class="dropdown-item"><i class="material-icons">delete</i>Delete Contact</button>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="content empty">
-									<div class="container">
-										<div class="col-md-12">
-											<div class="no-messages request">
-												<a href="#"><img class="avatar-xl" src="{% static 'dist/img/avatars/avatar-female-6.jpg' %}" data-toggle="tooltip" data-placement="top" title="Louis" alt="avatar"></a>
-												<h5>Louis Martinez would like to add you as a contact. <span>Hi Keith, I'd like to add you as a contact.</span></h5>
-												<div class="options">
-													<button class="btn button"><i class="material-icons">check</i></button>
-													<button class="btn button"><i class="material-icons">close</i></button>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="container">
-									<div class="col-md-12">
-										<div class="bottom">
-											<form class="position-relative w-100">
-												<textarea class="form-control" placeholder="Messaging unavailable" rows="1" disabled></textarea>
-												<button class="btn emoticons disabled" disabled><i class="material-icons">insert_emoticon</i></button>
-												<button class="btn send disabled" disabled><i class="material-icons">send</i></button>
-											</form>
-											<label>
-												<input type="file" disabled>
-												<span class="btn attach disabled d-sm-block d-none"><i class="material-icons">attach_file</i></span>
-											</label> 
-										</div>
-									</div>
-								</div>
-							</div>
-							<!-- End of Chat -->
-						</div>
-						<!-- End of Babble -->
-					</div>
-				</div>
-			</div> <!-- Layout -->
+				
 		</main>
 		<!-- Bootstrap/Swipe core JavaScript
 		================================================== -->
@@ -1250,6 +1006,8 @@
 			function scrollToBottom(el) { el.scrollTop = el.scrollHeight; }
 			scrollToBottom(document.getElementById('content'));
 		</script>
+
+
 	</body>
 
 </html>
