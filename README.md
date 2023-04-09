@@ -2,7 +2,9 @@
 
 A Web based chat application platform developed using Django (Channels).
 
-Just Clone it and run : python manage.py runserver. Thats it!
+Just Clone it and run :
+pip install django-channels
+python manage.py runserver. Thats it!
 
 Video Link: https://www.youtube.com/watch?v=lJeiyIVrAnc
 
